@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Greed Room — CEO Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --navy: #0d1420;
+    --navy-2: #141d2e;
+    --navy-3: #1b2740;
+    --gold: #c9a24b;
+    --gold-soft: #e3c47a;
+    --green: #4caf7d;
+    --red: #d9534f;
+    --text: #e8e6df;
+    --text-dim: #9aa3b5;
+    --border: #2a3650;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--navy); color:var(--text);
+    font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+  #app{max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; background:linear-gradient(180deg,var(--navy) 0%, var(--navy-2) 100%);}
+
+  /* ---- Header ---- */
+  header{
+    padding:18px 20px 14px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    position:sticky; top:0; background:rgba(13,20,32,0.95); backdrop-filter:blur(6px); z-index:10;
+  }
+  header .brand{font-size:15px; letter-spacing:2px; color:var(--gold); text-transform:uppercase;}
+  header .quarter{font-size:13px; color:var(--text-dim);}
+
+  /* ---- Screens ---- */
+  .screen{padding:16px 18px 100px; flex:1;}
+  .hidden{display:none !important;}
+
+  /* ---- Start screen ---- */
+  .intro{text-align:center; padding:30px 10px 10px;}
+  .intro h1{font-size:28px; margin:0 0 6px; color:var(--gold-soft);}
+  .intro p{color:var(--text-dim); font-size:14px; line-height:1.5;}
+  .industry-card{
+    background:var(--navy-3); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:.15s;
+  }
+  .industry-card:active{transform:scale(0.98);}
+  .industry-card.selected{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset;}
+  .industry-card .name{font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px;}
+  .industry-card .desc{font-size:12.5px; color:var(--text-dim); margin-top:4px; line-height:1.4;}
+  .tag-row{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  .tag{font-size:10.5px; padding:2px 8px; border-radius:20px; background:rgba(201,162,75,0.12); color:var(--gold-soft); border:1px solid rgba(201,162,75,0.3);}
+
+  .btn{
+    display:block; width:100%; text-align:center; padding:14px; border-radius:10px;
+    background:var(--gold); color:#151515; font-weight:700; font-size:15px; border:none;
+    cursor:pointer; margin-top:16px; letter-spacing:.3px;
+  }
+  .btn:active{opacity:.85;}
+  .btn.secondary{background:transparent; border:1px solid var(--border); color:var(--text);}
+  .btn.small{padding:9px; font-size:13px; margin-top:8px;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  /* ---- Dashboard ---- */
+  .kpi-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  .kpi{background:var(--navy-3); border:1px solid var(--border); border-radius:10px; padding:12px 14px;}
+  .kpi .label{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;}
+  .kpi .value{font-size:19px; font-weight:700; margin-top:3px;}
+  .kpi .value.pos{color:var(--green);}
+  .kpi .value.neg{color:var(--red);}
+  .kpi .sub{font-size:11px; color:var(--text-dim); margin-top:2px;}
+
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--gold-soft); margin:20px 0 10px; display:flex; justify-content:space-between; align-items:center;}
+  .badge{background:var(--red); color:white; font-size:10px; padding:1px 7px; border-radius:20px; font-weight:700;}
+
+  /* ---- Offices ---- */
+  .office-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--navy-3); border:1px solid var(--border); border-radius:10px;
+    padding:13px 14px; margin-bottom:8px; cursor:pointer;
+  }
+  .office-row .icon{font-size:22px; width:32px; text-align:center;}
+  .office-row .info{flex:1;}
+  .office-row .info .t{font-weight:600; font-size:14px;}
+  .office-row .info .s{font-size:12px; color:var(--text-dim); margin-top:1px;}
+  .office-row .arrow{color:var(--text-dim);}
+
+  /* ---- Directive cards ---- */
+  .directive-card{
+    background:var(--navy-3); border:1px solid var(--border); border-radius:10px;
+    padding:13px 14px; margin-bottom:10px;
+  }
+  .directive-card .t{font-weight:700; font-size:14.5px; margin-bottom:3px;}
+  .directive-card .d{font-size:12.5px; color:var(--text-dim); line-height:1.45; margin-bottom:8px;}
+  .invest-options{display:flex; gap:6px; margin-bottom:8px;}
+  .invest-btn{
+    flex:1; text-align:center; padding:8px 4px; border-radius:7px; font-size:11.5px;
+    background:var(--navy-2); border:1px solid var(--border); color:var(--text-dim); cursor:pointer;
+  }
+  .invest-btn.active{border-color:var(--gold); color:var(--gold-soft); background:rgba(201,162,75,0.1);}
+  .directive-meta{font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between; margin-bottom:8px;}
+
+  /* ---- Inbox ---- */
+  .report{
+    background:var(--navy-3); border:1px solid var(--border); border-left:3px solid var(--gold);
+    border-radius:8px; padding:12px 14px; margin-bottom:10px;
+  }
+  .report.success{border-left-color:var(--green);}
+  .report.fail{border-left-color:var(--red);}
+  .report .h{display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:4px;}
+  .report .t{font-weight:700; font-size:14px; margin-bottom:4px;}
+  .report .b{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+
+  .empty{color:var(--text-dim); font-size:13px; text-align:center; padding:30px 10px; font-style:italic;}
+
+  /* ---- Bottom nav ---- */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; max-width:520px; margin:0 auto;
+    background:rgba(13,20,32,0.97); border-top:1px solid var(--border);
+    display:flex; padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    gap:6px; backdrop-filter:blur(8px);
+  }
+  .nav-btn{
+    flex:1; background:none; border:none; color:var(--text-dim); font-size:9.5px;
+    display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 1px; border-radius:8px;
+  }
+  .nav-btn .ic{font-size:16px;}
+  .nav-btn.active{color:var(--gold-soft);}
+
+  .end-screen{text-align:center; padding:60px 20px;}
+  .end-screen h1{font-size:26px; margin-bottom:8px;}
+  .end-screen p{color:var(--text-dim); font-size:14px; line-height:1.6;}
+
+  .queue-note{font-size:12px; color:var(--gold-soft); background:rgba(201,162,75,0.1); border:1px solid rgba(201,162,75,0.3); border-radius:8px; padding:9px 12px; margin-bottom:12px;}
+
+  /* ---- Competitors ---- */
+  .comp-bar-row{margin-bottom:9px;}
+  .comp-bar-label{display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;}
+  .comp-bar-label .n{color:var(--text-dim);}
+  .comp-bar-label .n.me{color:var(--gold-soft); font-weight:700;}
+  .comp-bar-track{background:var(--navy-2); border:1px solid var(--border); border-radius:6px; height:8px; overflow:hidden;}
+  .comp-bar-fill{height:100%; background:var(--text-dim); border-radius:6px; transition:width .7s cubic-bezier(.22,.9,.35,1);}
+  .comp-bar-fill.me{background:var(--gold);}
+
+  /* ---- Event screen ---- */
+  .event-badge{display:inline-block; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--red); border:1px solid rgba(217,83,79,0.4); background:rgba(217,83,79,0.1); padding:3px 10px; border-radius:20px; margin-bottom:12px;}
+  .event-title{font-size:20px; margin:0 0 10px;}
+  .event-body{font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:18px;}
+  .event-choice{
+    background:var(--navy-3); border:1px solid var(--border); border-radius:10px;
+    padding:13px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  .event-choice .t{font-weight:700; font-size:14px; margin-bottom:3px;}
+  .event-choice .d{font-size:12px; color:var(--text-dim); line-height:1.4;}
+  .event-choice:active{border-color:var(--gold);}
+  .event-choice{animation:slideIn .35s ease backwards;}
+
+  @keyframes slideIn{from{opacity:0; transform:translateX(-8px);} to{opacity:1; transform:translateX(0);}}
+  @keyframes cardIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+  .directive-card, .report, .office-row, .comp-bar-row{animation:cardIn .3s ease backwards;}
+
+  .btn.loading{position:relative; color:transparent !important;}
+  .btn.loading::after{
+    content:''; position:absolute; top:50%; left:50%; width:16px; height:16px;
+    margin:-8px 0 0 -8px; border:2px solid rgba(21,21,21,0.3); border-top-color:#151515;
+    border-radius:50%; animation:spin .6s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---- Board scene ---- */
+  .board-scene-wrap{background:var(--navy-3); border:1px solid var(--border); border-radius:12px; padding:14px 8px 10px; margin-bottom:14px; box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+  .board-table-row{display:flex; justify-content:space-around; align-items:flex-end; position:relative;}
+  .board-avatar{background:none; border:none; display:flex; flex-direction:column; align-items:center; cursor:pointer; padding:4px 2px; -webkit-tap-highlight-color:transparent; font-family:inherit;}
+  .board-avatar:active{transform:scale(0.95);}
+  .avatar-head{width:26px; height:26px; border-radius:50%; background:#e3c47a; margin-bottom:-6px; position:relative; z-index:2; border:1.5px solid var(--navy-3); display:flex; align-items:center; justify-content:center; font-size:12px;}
+  .avatar-body{width:44px; height:36px; background:#1e2a44; border:1.5px solid var(--border); border-radius:14px 14px 5px 5px; display:flex; justify-content:center; padding-top:6px; transition:background .15s ease, border-color .15s ease;}
+  .avatar-tie{width:7px; height:16px; background:var(--gold); clip-path:polygon(50% 0%, 100% 22%, 62% 100%, 38% 100%, 0% 22%);}
+  .avatar-label{font-size:10px; color:var(--text-dim); margin-top:4px; transition:color .15s ease;}
+  .board-avatar.active .avatar-body{background:var(--gold); border-color:var(--gold-soft);}
+  .board-avatar.active .avatar-tie{background:#151515;}
+  .board-avatar.active .avatar-label{color:var(--gold-soft); font-weight:700;}
+  .board-table-surface{height:14px; background:linear-gradient(180deg,#3a2c14,#1f1708); border-top:2px solid var(--gold); border-radius:0 0 8px 8px; margin-top:-2px;}
+
+  /* ---- Cause-effect delta chips ---- */
+  .delta-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .delta-chip{font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; display:inline-flex; align-items:center; gap:3px;}
+  .delta-chip.pos{background:rgba(76,175,125,0.15); color:var(--green); border:1px solid rgba(76,175,125,0.4);}
+  .delta-chip.neg{background:rgba(217,83,79,0.15); color:var(--red); border:1px solid rgba(217,83,79,0.4);}
+  .consequence-title{font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--gold-soft); margin:4px 0 10px;}
+
+  /* ---- Visual polish additions ---- */
+  .screen{animation:fadeIn .28s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kpi{position:relative; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.25);}
+  .kpi::before{content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, var(--gold), transparent);}
+  .kpi .value{transition:color .3s;}
+  .kpi .value.bump{animation:bump .4s ease;}
+  @keyframes bump{0%{transform:scale(1);} 40%{transform:scale(1.12); color:var(--gold-soft);} 100%{transform:scale(1);}}
+
+  .directive-card, .industry-card, .office-row, .report, .event-choice{
+    box-shadow:0 2px 10px rgba(0,0,0,0.22);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .office-row:active, .industry-card:active, .event-choice:active{transform:scale(0.98);}
+
+  .btn{box-shadow:0 3px 14px rgba(201,162,75,0.25); transition:transform .1s ease, box-shadow .1s ease;}
+  .btn:active{transform:scale(0.97);}
+
+  .event-icon{font-size:40px; text-align:center; margin-bottom:6px;}
+
+  .sparkline-wrap{background:var(--navy-3); border:1px solid var(--border); border-radius:10px; padding:12px 14px 6px; margin-bottom:16px; box-shadow:0 2px 10px rgba(0,0,0,0.22);}
+  .sparkline-wrap .label{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:flex; justify-content:space-between;}
+  .sparkline-wrap canvas{width:100%; display:block;}
+
+  header .brand{position:relative;}
+  header .brand::after{content:''; position:absolute; left:0; right:0; bottom:-6px; height:1px; background:linear-gradient(90deg, var(--gold), transparent);}
+
+  .kpi-grid .kpi:nth-child(1){border-left:2px solid var(--gold);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="header" class="hidden">
+    <div class="brand">Greed Room</div>
+    <div class="quarter" id="quarterLabel">Q1 · Anno 1</div>
+  </header>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen">
+    <div class="intro">
+      <h1>Greed Room</h1>
+      <p style="color:var(--gold-soft); font-size:12.5px; font-style:italic; margin-top:-4px;">Ambizione, numeri, e il coraggio di decidere.</p>
+      <p>Sei il nuovo CEO. Deleghi alle funzioni, approvi progetti, decidi la strategia.<br>Scegli il settore in cui guiderai l'azienda.</p>
+      <p style="font-size:12px; color:var(--gold-soft); margin-top:10px;" id="macroNote"></p>
+    </div>
+    <div id="industryList"></div>
+    <div class="section-title" style="margin-top:4px;">Struttura societaria</div>
+    <div class="industry-card" data-listed="false" id="listedPrivate">
+      <div class="name">🔒 Azienda Privata</div>
+      <div class="desc">Nessuna pressione di mercato quotidiana. Il board valuta i risultati trimestre su trimestre.</div>
+    </div>
+    <div class="industry-card" data-listed="true" id="listedPublic">
+      <div class="name">📈 Quotata in Borsa</div>
+      <div class="desc">Il titolo reagisce in tempo reale ai risultati rispetto al budget, agli eventi e al sentiment di mercato. Più visibilità, più pressione.</div>
+    </div>
+    <button class="btn" id="startBtn" disabled>Inizia il mandato</button>
+    <button class="btn secondary" id="continueBtn" style="display:none; margin-top:10px;">Continua partita in corso →</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardScreen" class="screen hidden">
+    <div class="sparkline-wrap">
+      <div class="label"><span>Andamento valutazione aziendale</span><span id="sparklineNow"></span></div>
+      <canvas id="sparklineCanvas" height="60"></canvas>
+    </div>
+    <div class="sparkline-wrap" id="stockWrap" style="display:none;">
+      <div class="label"><span>📈 Titolo in Borsa</span><span id="stockNow"></span></div>
+      <canvas id="stockCanvas" height="60"></canvas>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Cassa</div><div class="value" id="kpiCash">—</div></div>
+      <div class="kpi"><div class="label">Ricavi / trim.</div><div class="value" id="kpiRevenue">—</div></div>
+      <div class="kpi"><div class="label">Margine EBITDA</div><div class="value" id="kpiMargin">—</div></div>
+      <div class="kpi"><div class="label">Quota di mercato</div><div class="value" id="kpiShare">—</div></div>
+      <div class="kpi"><div class="label">Morale team</div><div class="value" id="kpiMorale">—</div></div>
+      <div class="kpi"><div class="label">Reputazione</div><div class="value" id="kpiRep">—</div></div>
+      <div class="kpi"><div class="label">Fiducia del board</div><div class="value" id="kpiBoard">—</div></div>
+    </div>
+    <div class="kpi" style="margin-bottom:16px;">
+      <div class="label">Valutazione aziendale stimata</div>
+      <div class="value" id="kpiValuation" style="font-size:22px;">—</div>
+      <div class="sub" id="valuationTarget"></div>
+    </div>
+
+    <div class="section-title">Budget vs Actual · TGT anno <span id="budgetYear"></span></div>
+    <div class="directive-card" style="margin-bottom:16px;">
+      <div class="directive-meta"><span>Ricavi (run-rate annuo)</span><span id="budgetRevRow"></span></div>
+      <div class="directive-meta" style="margin-top:6px;"><span>Margine EBITDA</span><span id="budgetMarginRow"></span></div>
+    </div>
+
+    <div class="section-title">Panorama competitivo</div>
+    <div id="competitorBars"></div>
+
+    <div class="section-title">Direttive in corso <span id="pendingCount" class="badge hidden">0</span></div>
+    <div id="pendingList"></div>
+
+    <div class="section-title">Uffici</div>
+    <div class="office-row" data-office="finance">
+      <div class="icon">💰</div>
+      <div class="info"><div class="t">Finance</div><div class="s">M&A, ristrutturazione costi, capitale</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="office-row" data-office="marketing">
+      <div class="icon">📣</div>
+      <div class="info"><div class="t">Marketing</div><div class="s">Campagne, nuovi canali, rebranding</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="office-row" data-office="rd">
+      <div class="icon">🔬</div>
+      <div class="info"><div class="t">R&D</div><div class="s">Nuovi prodotti, efficientamento</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="office-row" data-office="ops">
+      <div class="icon">⚙️</div>
+      <div class="info"><div class="t">Operations</div><div class="s">Supply chain, automazione</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="office-row" data-office="sales">
+      <div class="icon">🏬</div>
+      <div class="info"><div class="t">Direzione Vendite</div><div class="s">Apertura punti vendita/concessionari, rete commerciale</div></div>
+      <div class="arrow">›</div>
+    </div>
+
+    <button class="btn" id="advanceBtn">Avanza trimestre →</button>
+  </div>
+
+  <!-- FINANCE VIEW -->
+  <div id="financeScreen" class="screen hidden">
+    <div class="section-title">Vista Finance</div>
+    <div class="sparkline-wrap">
+      <div class="label"><span>Valutazione aziendale</span><span id="fnValuationNow"></span></div>
+      <canvas id="fnValuationCanvas" height="60"></canvas>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Cassa disponibile</div><div class="value" id="fnCash">—</div></div>
+      <div class="kpi"><div class="label">Runway stimato</div><div class="value" id="fnRunway">—</div></div>
+      <div class="kpi"><div class="label">Ricavi annualizzati</div><div class="value" id="fnRevAnn">—</div></div>
+      <div class="kpi"><div class="label">EBITDA annualizzato</div><div class="value" id="fnEbitda">—</div></div>
+      <div class="kpi"><div class="label">Margine EBITDA</div><div class="value" id="fnMargin">—</div></div>
+      <div class="kpi"><div class="label">ROS (EBIT/Ricavi)</div><div class="value" id="fnRos">—</div></div>
+      <div class="kpi"><div class="label">Multiplo EV/EBITDA</div><div class="value" id="fnMultiple">—</div></div>
+    </div>
+    <div class="kpi" style="margin-bottom:16px;">
+      <div class="label">Valutazione DCF (proiezione a 5 anni)</div>
+      <div class="value" id="fnDcf" style="font-size:20px;">—</div>
+      <div class="sub" id="fnDcfAssumptions"></div>
+    </div>
+    <div class="section-title">Budget vs Actual · TGT anno <span id="fnBudgetYear"></span></div>
+    <div class="directive-card">
+      <div class="directive-meta"><span>Ricavi</span><span id="fnBudgetRev"></span></div>
+      <div class="directive-meta" style="margin-top:6px;"><span>Margine EBITDA</span><span id="fnBudgetMargin"></span></div>
+    </div>
+    <div id="fnStockSection" style="display:none;">
+      <div class="section-title">Titolo in Borsa</div>
+      <div class="sparkline-wrap">
+        <div class="label"><span>Prezzo indicizzato (base 100)</span><span id="fnStockNow"></span></div>
+        <canvas id="fnStockCanvas" height="60"></canvas>
+      </div>
+    </div>
+    <div class="section-title">Cosa sta frenando la Finance</div>
+    <div id="fnDiagnosis"></div>
+  </div>
+
+  <!-- COMMERCIAL VIEW -->
+  <div id="commercialScreen" class="screen hidden">
+    <div class="section-title">Vista Commerciale</div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Quota di mercato</div><div class="value" id="cmShare">—</div></div>
+      <div class="kpi"><div class="label">Crescita ricavi QoQ</div><div class="value" id="cmGrowth">—</div></div>
+      <div class="kpi"><div class="label">Reputazione</div><div class="value" id="cmRep">—</div></div>
+      <div class="kpi"><div class="label">Trimestri dall'ultima azione growth</div><div class="value" id="cmInactive">—</div></div>
+    </div>
+    <div class="section-title">Andamento quota di mercato</div>
+    <div class="sparkline-wrap">
+      <div class="label"><span>La tua azienda</span><span id="cmShareNow"></span></div>
+      <canvas id="cmShareCanvas" height="60"></canvas>
+    </div>
+    <div class="section-title">Panorama competitivo</div>
+    <div id="cmCompetitorBars"></div>
+    <div class="section-title">Rete di vendita territoriale</div>
+    <div id="cmZones"></div>
+    <div class="section-title">Cosa sta frenando la crescita</div>
+    <div id="cmDiagnosis"></div>
+  </div>
+
+  <!-- BOARD MEETING ROOM -->
+  <div id="boardScreen" class="screen hidden">
+    <div class="section-title">Sala del Consiglio</div>
+    <div class="queue-note">Tocca una persona al tavolo per chiedere la sua presentazione.</div>
+    <div class="board-scene-wrap">
+      <div id="boardPhaserContainer" style="width:100%; display:flex; justify-content:center; min-height:170px;"></div>
+      <div class="board-table-row" id="boardSeatsRow" style="display:none;"></div>
+      <div class="board-table-surface"></div>
+    </div>
+    <div id="boardPresentationPanel" class="directive-card hidden" style="margin-bottom:16px;">
+      <div class="t" id="boardPresTitle"></div>
+      <div class="d" id="boardPresBody" style="margin-bottom:10px;"></div>
+      <button class="btn small" id="boardOpenOfficeBtn">Apri ufficio →</button>
+    </div>
+    <div id="boardFunctionList"></div>
+  </div>
+
+  <!-- OFFICE SCREEN -->
+  <div id="officeScreen" class="screen hidden">
+    <div class="section-title"><span id="officeTitle">Ufficio</span></div>
+    <div class="queue-note" id="slotNote"></div>
+    <div id="directiveList"></div>
+    <button class="btn secondary small" id="backToDash">← Torna alla dashboard</button>
+  </div>
+
+  <!-- INBOX -->
+  <div id="inboxScreen" class="screen hidden">
+    <div class="section-title">Report ricevuti</div>
+    <div id="reportList"></div>
+  </div>
+
+  <!-- EVENT SCREEN -->
+  <div id="eventScreen" class="screen hidden">
+    <div class="event-icon" id="eventIcon">📰</div>
+    <div class="event-badge" id="eventBadge">Notizia</div>
+    <h2 class="event-title" id="eventTitle"></h2>
+    <p class="event-body" id="eventBody"></p>
+    <div id="eventChoices"></div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="endScreen" class="screen hidden">
+    <div class="end-screen">
+      <h1 id="endTitle"></h1>
+      <p id="endBody"></p>
+      <button class="btn" onclick="location.reload()">Nuova partita</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav hidden" id="bottomNav">
+    <button class="nav-btn active" data-screen="dashboardScreen"><div class="ic">🏛</div>Dashboard</button>
+    <button class="nav-btn" data-screen="financeScreen"><div class="ic">💰</div>Finance</button>
+    <button class="nav-btn" data-screen="commercialScreen"><div class="ic">📊</div>Commerciale</button>
+    <button class="nav-btn" data-screen="boardScreen"><div class="ic">🪑</div>Board</button>
+    <button class="nav-btn" data-screen="inboxScreen"><div class="ic">📥</div>Report<span id="navBadge" style="display:none"></span></button>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+<script>
+/* ============ DATA: INDUSTRY ARCHETYPES ============ */
+const INDUSTRIES = [
+  {
+    id:'auto_luxury', name:'Automotive & Luxury Manufacturing', icon:'🏎️',
+    desc:'Alta intensità di capitale, margini premium su volumi contenuti, cicli lunghi di sviluppo prodotto.',
+    tags:['Alto capex','Margini premium','Ciclico'],
+    baseMargin:0.22, capexMult:1.6, volatility:0.9, cyclicality:0.15,
+    startRevenue:38, startShare:0.08, evMultiple:9
+  },
+  {
+    id:'tech_saas', name:'Tech / SaaS', icon:'💻',
+    desc:'Basso capex, margini alti, crescita rapida ma esposta a shock di fiducia e concorrenza aggressiva.',
+    tags:['Basso capex','Alta crescita','Alta volatilità'],
+    baseMargin:0.32, capexMult:0.6, volatility:1.4, cyclicality:0.10,
+    startRevenue:22, startShare:0.05, evMultiple:14
+  },
+  {
+    id:'retail', name:'Retail & Largo Consumo', icon:'🛍️',
+    desc:'Margini sottili, competizione sui prezzi, forte stagionalità e sensibilità ai costi operativi.',
+    tags:['Margini bassi','Stagionale','Alta competizione'],
+    baseMargin:0.09, capexMult:0.9, volatility:0.8, cyclicality:0.25,
+    startRevenue:45, startShare:0.11, evMultiple:6
+  },
+  {
+    id:'financial', name:'Financial Services', icon:'🏦',
+    desc:'Fortemente regolamentato, margini stabili nel tempo ma esposto a shock macro e di fiducia.',
+    tags:['Regolamentato','Margini stabili','Shock macro'],
+    baseMargin:0.26, capexMult:0.7, volatility:0.7, cyclicality:0.20,
+    startRevenue:55, startShare:0.09, evMultiple:8
+  },
+  {
+    id:'energy', name:'Energy & Industrial', icon:'⚡',
+    desc:'Capex molto elevato, esposizione ai prezzi delle commodity, cicli di investimento pluriennali.',
+    tags:['Capex elevato','Commodity-linked','Cicli lunghi'],
+    baseMargin:0.18, capexMult:1.9, volatility:1.1, cyclicality:0.30,
+    startRevenue:60, startShare:0.07, evMultiple:7
+  }
+];
+
+/* ============ DATA: DIRECTIVES BY OFFICE ============ */
+// impact functions receive (state, industry, level) level = 0 low,1 med,2 high
+const LEVELS = ['Basso','Medio','Alto'];
+
+/* ============ ZONES (territorial expansion) ============ */
+const ZONES = [
+  {id:'nord', name:'Nord Italia', potential:1.0},
+  {id:'centro_sud', name:'Centro-Sud Italia', potential:0.8},
+  {id:'europa', name:'Europa', potential:1.6},
+  {id:'extra_ue', name:'Mercati Extra-UE', potential:1.3}
+];
+
+/* ============ DRIVER DIAGNOSTICS (replaces abstract % with real causes) ============ */
+function pushDriver(s, category, text){
+  s.driverLog = s.driverLog || [];
+  s.driverLog.push({quarter:s.quarter, category, text});
+  if(s.driverLog.length>40) s.driverLog.shift();
+}
+
+const DIRECTIVES = {
+  finance:[
+    {
+      id:'ma_analysis', name:'Analisi acquisizione (M&A)',
+      desc:'Il team Finance valuta un target di acquisizione per espandere quota di mercato o capacità.',
+      delay:[1,2,2], costFactor:[0.03,0.06,0.10],
+      resolve:(s,ind,lvl)=>{
+        const p = 0.45 + lvl*0.12 - ind.volatility*0.05;
+        if(Math.random()<p){
+          const shareGain = (0.015+lvl*0.015);
+          s.marketShare += shareGain;
+          s.revenue *= (1+shareGain*0.8);
+          s.reputation = clamp(s.reputation+4,0,100);
+          return {ok:true, title:'M&A completata con successo', body:`L'acquisizione è andata a buon fine. Quota di mercato +${(shareGain*100).toFixed(1)}pp, ricavi in crescita.`};
+        } else {
+          s.cash -= s.revenue*0.02;
+          s.reputation = clamp(s.reputation-3,0,100);
+          pushDriver(s,'finance', `Il deal M&A analizzato non ha superato la due diligence: costi di consulenza sostenuti senza beneficio.`);
+          return {ok:false, title:'Acquisizione saltata', body:'La due diligence ha rivelato criticità: operazione annullata, con costi di consulenza già sostenuti.'};
+        }
+      }
+    },
+    {
+      id:'cost_restructure', name:'Piano di ristrutturazione costi',
+      desc:'Riduci la base costi dell\'azienda. Un piano aggressivo pesa sul morale del team.',
+      delay:[1,1,2], costFactor:[0.01,0.02,0.03],
+      resolve:(s,ind,lvl)=>{
+        const marginGain = 0.02+lvl*0.025;
+        s.baseMargin = clamp(s.baseMargin+marginGain,0.02,0.6);
+        const moraleHit = 3+lvl*6;
+        s.morale = clamp(s.morale-moraleHit,0,100);
+        return {ok:true, title:'Ristrutturazione completata', body:`Margine EBITDA +${(marginGain*100).toFixed(1)}pp. Il morale del team è sceso di ${moraleHit} punti.`};
+      }
+    },
+    {
+      id:'raise_capital', name:'Raccolta capitale',
+      desc:'Finance negozia nuova liquidità (debito o equity) per finanziare la crescita.',
+      delay:[1,1,1], costFactor:[0,0,0],
+      resolve:(s,ind,lvl)=>{
+        const amount = s.revenue*(0.15+lvl*0.15);
+        s.cash += amount;
+        s.reputation = clamp(s.reputation-(1+lvl),0,100);
+        return {ok:true, title:'Capitale raccolto', body:`+${fmt(amount)} in cassa. Lieve impatto sulla reputazione per l'aumento della leva/diluizione.`};
+      }
+    }
+  ],
+  marketing:[
+    {
+      id:'ad_campaign', name:'Campagna pubblicitaria',
+      desc:'Investi in comunicazione per guadagnare quota di mercato nel breve periodo.',
+      delay:[1,1,1], costFactor:[0.02,0.04,0.07],
+      resolve:(s,ind,lvl)=>{
+        const p = 0.55+lvl*0.1;
+        if(Math.random()<p){
+          const gain = 0.008+lvl*0.012;
+          s.marketShare += gain;
+          s.revenue *= (1+gain);
+          return {ok:true, title:'Campagna efficace', body:`Quota di mercato +${(gain*100).toFixed(1)}pp grazie alla campagna.`};
+        }
+        return {ok:false, title:'Campagna sottotono', body:'Il ritorno sull\'investimento è stato inferiore alle attese.'};
+      }
+    },
+    {
+      id:'new_channel', name:'Nuovo canale / segmento di revenue',
+      desc:'Diversifica i ricavi aprendo un nuovo canale commerciale o segmento cliente. Utile in fasi di stallo.',
+      delay:[2,3,3], costFactor:[0.04,0.08,0.13],
+      resolve:(s,ind,lvl)=>{
+        const p = 0.4+lvl*0.15-ind.volatility*0.05;
+        if(Math.random()<p){
+          const newRev = s.revenue*(0.05+lvl*0.06);
+          s.revenue += newRev;
+          s.reputation = clamp(s.reputation+3,0,100);
+          return {ok:true, title:'Nuovo canale lanciato', body:`Nuovo flusso di ricavi attivo: +${fmt(newRev)}/trimestre. L'azienda diversifica il proprio business.`};
+        }
+        s.cash -= s.revenue*0.02;
+        pushDriver(s,'commercial', `Il nuovo canale/segmento non ha attratto clienti come atteso: il mercato locale non ha risposto.`);
+        return {ok:false, title:'Nuovo canale non decollato', body:'Il mercato non ha risposto come previsto: risorse investite senza ritorno immediato.'};
+      }
+    },
+    {
+      id:'rebrand', name:'Rebranding',
+      desc:'Riposiziona il brand per rafforzare la reputazione e la percezione sul mercato.',
+      delay:[2,2,3], costFactor:[0.03,0.05,0.08],
+      resolve:(s,ind,lvl)=>{
+        const p=0.6+lvl*0.1;
+        if(Math.random()<p){
+          const gain = 5+lvl*4;
+          s.reputation = clamp(s.reputation+gain,0,100);
+          return {ok:true, title:'Rebranding riuscito', body:`Reputazione +${gain} punti. Il mercato percepisce il brand in modo più solido.`};
+        }
+        s.reputation = clamp(s.reputation-4,0,100);
+        return {ok:false, title:'Rebranding contestato', body:'Il cambio di posizionamento non è stato accolto bene: reputazione in leggero calo.'};
+      }
+    }
+  ],
+  rd:[
+    {
+      id:'new_product', name:'Nuovo prodotto',
+      desc:'Sviluppa una nuova linea prodotto. Alto potenziale, ma richiede tempo e non sempre riesce.',
+      delay:[2,3,4], costFactor:[0.05,0.09,0.15],
+      resolve:(s,ind,lvl)=>{
+        const p = 0.35+lvl*0.15-ind.volatility*0.05;
+        if(Math.random()<p){
+          const rev = s.revenue*(0.06+lvl*0.08);
+          s.revenue += rev;
+          s.marketShare += 0.01+lvl*0.01;
+          return {ok:true, title:'Nuovo prodotto lanciato con successo', body:`Il prodotto genera +${fmt(rev)}/trimestre e rafforza la posizione competitiva.`};
+        }
+        s.cash -= s.revenue*(0.03+lvl*0.02);
+        s.morale = clamp(s.morale-4,0,100);
+        pushDriver(s,'commercial', `Il lancio prodotto non ha sfondato: la domanda in questo segmento è più debole del previsto.`);
+        return {ok:false, title:'Prodotto non ha sfondato', body:'Lo sviluppo non ha prodotto i risultati sperati: costi sostenuti, morale del team R&D in calo.'};
+      }
+    },
+    {
+      id:'product_efficiency', name:'Efficientamento prodotto esistente',
+      desc:'Migliora margini e qualità della gamma attuale senza il rischio di un lancio ex novo.',
+      delay:[1,2,2], costFactor:[0.02,0.04,0.06],
+      resolve:(s,ind,lvl)=>{
+        const gain = 0.015+lvl*0.02;
+        s.baseMargin = clamp(s.baseMargin+gain,0.02,0.6);
+        return {ok:true, title:'Efficientamento completato', body:`Margine EBITDA +${(gain*100).toFixed(1)}pp sulla gamma esistente.`};
+      }
+    },
+    {
+      id:'explore_rd', name:'Ricerca esplorativa',
+      desc:'Scommessa ad alto rischio/rendimento su tecnologie o mercati adiacenti.',
+      delay:[3,4,4], costFactor:[0.06,0.10,0.16],
+      resolve:(s,ind,lvl)=>{
+        const p = 0.25+lvl*0.12;
+        if(Math.random()<p){
+          const rev = s.revenue*(0.10+lvl*0.12);
+          s.revenue += rev;
+          s.reputation = clamp(s.reputation+6,0,100);
+          return {ok:true, title:'Scommessa vinta', body:`La ricerca esplorativa apre una nuova frontiera di business: +${fmt(rev)}/trimestre.`};
+        }
+        s.cash -= s.revenue*(0.04+lvl*0.03);
+        return {ok:false, title:'Scommessa persa', body:'L\'investimento esplorativo non ha dato risultati. Capitale bruciato senza ritorno.'};
+      }
+    }
+  ],
+  ops:[
+    {
+      id:'supply_chain', name:'Ottimizzazione supply chain',
+      desc:'Riduce i costi operativi migliorando l\'efficienza della catena di fornitura.',
+      delay:[1,2,2], costFactor:[0.02,0.04,0.06],
+      resolve:(s,ind,lvl)=>{
+        const gain=0.015+lvl*0.02;
+        s.baseMargin = clamp(s.baseMargin+gain,0.02,0.6);
+        return {ok:true, title:'Supply chain ottimizzata', body:`Margine EBITDA +${(gain*100).toFixed(1)}pp grazie a una catena di fornitura più efficiente.`};
+      }
+    },
+    {
+      id:'automation', name:'Automazione',
+      desc:'Investimento in automazione: riduce i costi nel lungo periodo ma può impattare il morale.',
+      delay:[2,3,3], costFactor:[0.05,0.09,0.14],
+      resolve:(s,ind,lvl)=>{
+        const gain=0.025+lvl*0.03;
+        s.baseMargin = clamp(s.baseMargin+gain,0.02,0.6);
+        const moraleHit = 4+lvl*5;
+        s.morale = clamp(s.morale-moraleHit,0,100);
+        return {ok:true, title:'Automazione completata', body:`Margine EBITDA +${(gain*100).toFixed(1)}pp. Morale -${moraleHit} per il timore di ricadute occupazionali.`};
+      }
+    }
+  ],
+  sales:[
+    {
+      id:'new_store', name:'Apertura punto vendita / concessionario',
+      desc:'Apri una nuova presenza fisica in una zona non ancora coperta, per intercettare la domanda locale.',
+      zoneBased:true,
+      delay:3,
+      resolve:(s,ind,zoneId)=>{
+        const zone = s.zones.find(z=>z.id===zoneId);
+        if(!zone) return {ok:false, title:'Apertura non riuscita', body:'Zona non disponibile.'};
+        const p = 0.55 - ind.volatility*0.05;
+        if(Math.random()<p){
+          zone.opened=true;
+          const contribution = s.revenue*0.14*zone.potential;
+          zone.revenueContribution = contribution;
+          s.revenue += contribution;
+          s.marketShare = clamp(s.marketShare+0.012*zone.potential,0,1);
+          return {ok:true, title:`Apertura completata a ${zone.name}`, body:`Il nuovo punto vendita è operativo: +${fmt(contribution)}/trimestre e quota di mercato rafforzata in zona.`};
+        } else {
+          s.cash -= s.revenue*0.03;
+          pushDriver(s,'commercial', `L'apertura a ${zone.name} ha subìto ritardi logistici/autorizzativi: investimento sostenuto senza ritorno immediato.`);
+          return {ok:false, title:`Apertura a ${zone.name} in ritardo`, body:'Difficoltà logistiche o autorizzative hanno rallentato l\'apertura: risorse investite senza ancora un ritorno.'};
+        }
+      }
+    },
+    {
+      id:'strengthen_network', name:'Rafforza la rete vendita esistente',
+      desc:'Investi sui punti vendita già aperti per aumentarne la produttività e le vendite.',
+      delay:[1,2,2], costFactor:[0.02,0.04,0.07],
+      resolve:(s,ind,lvl)=>{
+        const openedZones = s.zones.filter(z=>z.opened);
+        const gain = 0.01+lvl*0.012;
+        if(openedZones.length===0){
+          s.revenue *= (1+gain*0.4);
+          return {ok:true, title:'Rete vendita rafforzata', body:`Nessun punto vendita dedicato ancora aperto: il beneficio si riflette solo parzialmente sui ricavi generali (+${(gain*40).toFixed(1)}%).`};
+        }
+        s.revenue *= (1+gain);
+        return {ok:true, title:'Rete vendita rafforzata', body:`Ricavi della rete di vendita +${(gain*100).toFixed(1)}% grazie al rafforzamento dei ${openedZones.length} punti vendita attivi.`};
+      }
+    },
+    {
+      id:'sales_force_opt', name:'Ottimizzazione della forza vendita',
+      desc:'Migliora incentivi, formazione e processi commerciali per aumentare il tasso di chiusura.',
+      delay:[1,1,2], costFactor:[0.015,0.03,0.05],
+      resolve:(s,ind,lvl)=>{
+        const gain=0.01+lvl*0.015;
+        s.baseMargin=clamp(s.baseMargin+gain*0.4,0.02,0.6);
+        s.revenue*=(1+gain*0.6);
+        return {ok:true, title:'Forza vendita ottimizzata', body:`Tasso di chiusura migliorato: ricavi +${(gain*60).toFixed(1)}%, margine leggermente rafforzato.`};
+      }
+    }
+  ]
+};
+
+function pickVariant(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* ============ MACRO / DISRUPTIVE EVENTS ============ */
+// weight(ind) returns a relative probability weight for this industry (0 = impossibile)
+const EVENTS = [
+  {
+    id:'commodity_shock', title:'Rincaro delle materie prime',
+    weight:(ind)=> ['auto_luxury','energy','retail'].includes(ind.id)?3:1,
+    body:(s,ind)=>{ const pct=Math.round(8+Math.random()*12); s._pct=pct;
+      const material = pickVariant(['acciaio e alluminio','componenti elettronici','energia e logistica','materie prime critiche','packaging e trasporti']);
+      return `Il costo di ${material} è salito del ${pct}% nell'ultimo trimestre, comprimendo i margini lungo tutta la filiera.`; },
+    choices:[
+      {label:'Assorbi il costo, mantieni i prezzi', desc:'Margine sotto pressione, ma clienti e reputazione protetti.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin-0.02*(s._pct/10),0.02,0.6); s.reputation=clamp(s.reputation+2,0,100); pushDriver(s,'finance', `Rincaro materie prime (+${s._pct}%) assorbito internamente: costi fissi/variabili in aumento hanno eroso il margine.`); }},
+      {label:'Scarica il rincaro sui clienti', desc:'Margine recuperato in parte, ma rischi di perdere quota di mercato.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin-0.008*(s._pct/10),0.02,0.6); s.marketShare=clamp(s.marketShare-0.012,0,1); }},
+      {label:'Rinegozia con i fornitori', desc:'Costo una tantum, mitigazione parziale del rincaro.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.02; s.baseMargin=clamp(s.baseMargin-0.012*(s._pct/10),0.02,0.6); }}
+    ]
+  },
+  {
+    id:'strike', title:'Sciopero dei lavoratori',
+    weight:(ind)=> 1,
+    body:(s,ind)=>pickVariant([
+      'Il morale ai minimi ha portato a un\'agitazione sindacale: i lavoratori proclamano uno sciopero nei siti produttivi.',
+      'Le tensioni sul rinnovo del contratto collettivo sfociano in uno sciopero che blocca parte della produzione.',
+      'Un presidio spontaneo dei dipendenti rallenta le attività in attesa di risposte dall\'azienda.'
+    ]),
+    choices:[
+      {label:'Negozia e concedi aumenti', desc:'Costo immediato, ma il morale recupera in modo significativo.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.05; s.morale=clamp(s.morale+15,0,100); }},
+      {label:'Tieni la linea dura', desc:'Produzione ferma per il trimestre: ricavi e reputazione ne risentono.',
+        apply:(s,ind)=>{ s.revenue*=0.9; s.reputation=clamp(s.reputation-4,0,100); s.morale=clamp(s.morale-6,0,100); }},
+      {label:'Piano di welfare mirato (HR)', desc:'Costo minore, effetto più lento ma nessuna perdita di produzione.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.025; s.morale=clamp(s.morale+7,0,100); }}
+    ]
+  },
+  {
+    id:'price_war', title:'Guerra dei prezzi',
+    weight:(ind)=> ['retail','tech_saas'].includes(ind.id)?3:1.2,
+    body:(s,ind)=>pickVariant([
+      'Un concorrente diretto lancia una politica di prezzi aggressiva per guadagnare quota di mercato.',
+      'Un player del settore taglia i listini in modo aggressivo per acquisire nuovi clienti.',
+      'La pressione competitiva sui prezzi si intensifica improvvisamente in tutto il segmento.'
+    ]),
+    choices:[
+      {label:'Rispondi abbassando i prezzi', desc:'Margine compresso per un paio di trimestri, quota difesa.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin-0.03,0.02,0.6); }},
+      {label:'Non reagire, punta su valore/brand', desc:'Rischi di perdere quota se il brand non è già forte.',
+        apply:(s,ind)=>{ const loss = s.reputation>65? 0.006 : 0.018; s.marketShare=clamp(s.marketShare-loss,0,1); pushDriver(s,'commercial', `Guerra dei prezzi non contrastata: stai perdendo clienti sensibili al prezzo verso i concorrenti diretti.`); }},
+      {label:'Promozione mirata (Marketing)', desc:'Costo contenuto, risposta più chirurgica e meno logorante.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.03; s.marketShare=clamp(s.marketShare+0.004,0,1); }}
+    ]
+  },
+  {
+    id:'rate_hike', title:'Rialzo dei tassi di interesse',
+    weight:(ind)=>1.5,
+    body:(s,ind)=>pickVariant([
+      'La banca centrale alza i tassi per contenere l\'inflazione: il costo del capitale sale per tutte le aziende esposte a debito.',
+      'Un nuovo rialzo dei tassi rende il credito più costoso in tutta l\'economia.',
+      'Le condizioni di finanziamento peggiorano dopo l\'ennesima stretta monetaria.'
+    ]),
+    choices:[
+      {label:'Rifinanzia subito a condizioni peggiori', desc:'Costo immediato ma certezza sui prossimi trimestri.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.04; }},
+      {label:'Riduci gli investimenti pianificati', desc:'Annulla la direttiva più recente in corso, se presente.',
+        apply:(s,ind)=>{ if(s.pending.length>0){ const removed=s.pending.pop(); s.reports.push({quarter:s.quarter+1, office:removed.office, ok:false, title:'Direttiva annullata per contenimento costi', body:`"${removed.name}" è stata cancellata per liberare cassa dopo il rialzo dei tassi.`});} }},
+      {label:'Ignora, mantieni la rotta', desc:'Nessuna azione ora, ma il costo del capitale resterà più alto nei prossimi trimestri.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin-0.01,0.02,0.6); pushDriver(s,'finance', `Costo del capitale più alto per il rialzo dei tassi non gestito: oneri finanziari in aumento comprimono il margine.`); }}
+    ]
+  },
+  {
+    id:'new_entrant', title:'Nuovo concorrente sul mercato',
+    weight:(ind)=>1.3,
+    body:(s,ind)=>pickVariant([
+      'Un nuovo player entra nel mercato con un modello di business disruptive, minacciando di eroderne gli equilibri.',
+      'Una startup ben finanziata entra nel settore puntando su prezzi aggressivi e marketing digitale.',
+      'Un gruppo estero annuncia l\'ingresso nel mercato con una strategia di espansione rapida.'
+    ]),
+    choices:[
+      {label:'Osserva e monitora', desc:'Nessun costo ora, ma rischio di erosione di quota nei prossimi trimestri.',
+        apply:(s,ind)=>{ s.marketShare=clamp(s.marketShare-0.006,0,1); }},
+      {label:'Investi in difesa del segmento', desc:'Costo immediato, quota protetta.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.04; }}
+    ]
+  },
+  {
+    id:'regulation', title:'Nuova normativa di settore',
+    weight:(ind)=> ind.id==='financial'?3:1.4,
+    body:(s,ind)=>pickVariant([
+      'Il regolatore introduce nuovi requisiti di compliance per il settore.',
+      'Una nuova direttiva impone standard più severi su sicurezza e trasparenza.',
+      'Le autorità di vigilanza alzano l\'asticella sui requisiti operativi del settore.'
+    ]),
+    choices:[
+      {label:'Adeguati subito', desc:'Costo una tantum, reputazione rafforzata.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.03; s.reputation=clamp(s.reputation+3,0,100); }},
+      {label:'Rimanda l\'adeguamento', desc:'Risparmi ora, ma rischi una sanzione futura.',
+        apply:(s,ind)=>{ s._delayedPenalty=true; }}
+    ]
+  },
+  {
+    id:'demand_boom', title:'Espansione economica',
+    weight:(ind)=>1.2,
+    body:(s,ind)=>pickVariant([
+      'Una fase di crescita economica sta aumentando la domanda in tutto il settore.',
+      'Gli indicatori macro sono favorevoli: i consumi e gli investimenti nel settore accelerano.',
+      'Un ciclo economico positivo spinge la domanda ben oltre le attese.'
+    ]),
+    choices:[
+      {label:'Massimizza la produzione', desc:'Ricavi in crescita ora, ma straordinari pesano sul morale.',
+        apply:(s,ind)=>{ s.revenue*=1.08; s.morale=clamp(s.morale-3,0,100); }},
+      {label:'Mantieni un ritmo stabile', desc:'Crescita più contenuta, nessun costo organizzativo.',
+        apply:(s,ind)=>{ s.revenue*=1.03; }}
+    ]
+  },
+  {
+    id:'cyberattack', title:'Attacco informatico',
+    weight:(ind)=> ['tech_saas','financial'].includes(ind.id)?2.6:1,
+    body:(s,ind)=>'Un attacco informatico ha colpito i sistemi aziendali, esponendo dati sensibili e fermando alcune operazioni.',
+    choices:[
+      {label:'Paga per il ripristino rapido (Finance)', desc:'Costo alto ma operatività ripristinata subito.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.06; s.reputation=clamp(s.reputation-2,0,100); }},
+      {label:'Gestisci internamente con il team IT', desc:'Costo minore, ma il recupero è più lento e i ricavi del trimestre ne risentono.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.02; s.revenue*=0.93; }},
+      {label:'Comunica in piena trasparenza ai clienti', desc:'Costo di compensazione ai clienti coinvolti, ma reputazione preservata.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.04; s.reputation=clamp(s.reputation+2,0,100); }}
+    ]
+  },
+  {
+    id:'key_talent_exit', title:'Addio di un dirigente chiave',
+    weight:(ind)=>1.4,
+    body:(s,ind)=>pickVariant([
+      'Un dirigente chiave lascia l\'azienda per un concorrente, portando con sé know-how e alcuni clienti.',
+      'Il responsabile di una funzione strategica si dimette improvvisamente per un\'offerta esterna.',
+    ]),
+    choices:[
+      {label:'Offri una controproposta economica', desc:'Costo immediato, buone probabilità di trattenerlo.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.03; if(Math.random()<0.6){ s.morale=clamp(s.morale+4,0,100);} else { s.reputation=clamp(s.reputation-2,0,100);} }},
+      {label:'Lascialo andare, promuovi dall\'interno', desc:'Nessun costo, ma un breve calo di morale e continuità.',
+        apply:(s,ind)=>{ s.morale=clamp(s.morale-5,0,100); }},
+      {label:'Ricerca esterna aggressiva (HR)', desc:'Costo medio, richiede tempo ma porta nuove competenze.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.035; s.reputation=clamp(s.reputation+2,0,100); }}
+    ]
+  },
+  {
+    id:'favorable_regulation', title:'Incentivi fiscali per il settore',
+    weight:(ind)=>1.1,
+    body:(s,ind)=>'Il governo introduce incentivi fiscali e agevolazioni per stimolare il settore.',
+    choices:[
+      {label:'Sfrutta subito gli incentivi (Finance)', desc:'Beneficio immediato in cassa.',
+        apply:(s,ind)=>{ s.cash+=s.revenue*0.3; }},
+      {label:'Reinvestili in R&D', desc:'Beneficio ritardato ma più duraturo sul prodotto.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin+0.015,0.02,0.6); }}
+    ]
+  },
+  {
+    id:'currency_shock', title:'Shock valutario',
+    weight:(ind)=> ['auto_luxury','energy'].includes(ind.id)?2:1,
+    body:(s,ind)=>'Una forte oscillazione dei tassi di cambio impatta la competitività sui mercati esteri.',
+    choices:[
+      {label:'Copri il rischio con strumenti finanziari', desc:'Costo contenuto, effetto stabilizzato.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.015; }},
+      {label:'Non coprire, accetta la volatilità', desc:'Esito incerto: può andare bene o male.',
+        apply:(s,ind)=>{ const dir = Math.random()<0.5? 1:-1; s.revenue*= (1+dir*0.05); }}
+    ]
+  },
+  {
+    id:'supplier_scandal', title:'Scandalo presso un fornitore',
+    weight:(ind)=>1.2,
+    body:(s,ind)=>'Un fornitore chiave è coinvolto in uno scandalo etico o ambientale, con rischio reputazionale per l\'azienda.',
+    choices:[
+      {label:'Interrompi subito il rapporto', desc:'Costo per il cambio fornitore, ma reputazione protetta.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.04; s.reputation=clamp(s.reputation+3,0,100); }},
+      {label:'Continua e gestisci in silenzio', desc:'Nessun costo ora, ma rischio di uno scandalo pubblico più avanti.',
+        apply:(s,ind)=>{ s._delayedPenalty=true; }},
+      {label:'Comunica un piano correttivo pubblico', desc:'Costo moderato, reputazione rafforzata nel tempo.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.025; s.reputation=clamp(s.reputation+5,0,100); }}
+    ]
+  },
+  {
+    id:'trade_tariffs', title:'Nuovi dazi commerciali',
+    weight:(ind)=> ['auto_luxury','energy','retail'].includes(ind.id)?2:1,
+    body:(s,ind)=>'Nuovi dazi doganali colpiscono le esportazioni del settore verso mercati chiave.',
+    choices:[
+      {label:'Rilocalizza parte della produzione', desc:'Investimento importante ora, ma protegge il margine nel lungo periodo.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.08; s.baseMargin=clamp(s.baseMargin+0.015,0.02,0.6); }},
+      {label:'Assorbi il costo dei dazi', desc:'Nessun investimento, ma il margine resta sotto pressione.',
+        apply:(s,ind)=>{ s.baseMargin=clamp(s.baseMargin-0.02,0.02,0.6); }},
+      {label:'Cerca nuovi mercati non colpiti (Marketing)', desc:'Costo medio, diversifica parzialmente l\'esposizione.',
+        apply:(s,ind)=>{ s.cash-=s.revenue*0.03; s.revenue*=1.02; }}
+    ]
+  }
+];
+
+/* ============ NAMED APPROACHES (replace generic Basso/Medio/Alto) ============ */
+const APPROACH_LABELS = {
+  ma_analysis:[
+    {name:'Analisi rapida interna', desc:'Il team Finance valuta il target con le risorse interne: veloce ed economico, ma meno approfondito.'},
+    {name:'Due diligence con advisor esterno', desc:'Coinvolgi una banca d\'affari per una valutazione standard, più solida ma più costosa.'},
+    {name:'Due diligence multi-advisor approfondita', desc:'Analisi esaustiva con più consulenti: costosa e lenta, ma massimizza le probabilità di successo.'}
+  ],
+  cost_restructure:[
+    {name:'Ottimizzazione mirata', desc:'Pochi tagli chirurgici su sprechi evidenti: basso impatto, basso rischio.'},
+    {name:'Piano di ristrutturazione strutturale', desc:'Revisione organica dei processi e dei costi fissi.'},
+    {name:'Ristrutturazione aggressiva con riduzione del personale', desc:'Taglio deciso della struttura: forte impatto sui margini, ma pesa duramente sul morale.'}
+  ],
+  raise_capital:[
+    {name:'Linea di credito bancaria', desc:'Capitale rapido tramite debito bancario tradizionale: importo contenuto, impatto reputazionale minimo.'},
+    {name:'Emissione obbligazionaria', desc:'Raccolta di debito sul mercato: importo maggiore, leva più alta.'},
+    {name:'Aumento di capitale (equity)', desc:'Nuovi soci entrano in cambio di quote: importo elevato, ma diluizione e maggiore scrutinio.'}
+  ],
+  ad_campaign:[
+    {name:'Campagna social a budget contenuto', desc:'Comunicazione digitale mirata, economica ma con impatto limitato.'},
+    {name:'Campagna multicanale', desc:'TV, digital e stampa insieme: investimento medio, buona visibilità.'},
+    {name:'Campagna globale con testimonial', desc:'Investimento importante per massima visibilità e impatto sul mercato.'}
+  ],
+  new_channel:[
+    {name:'Test pilota di nicchia', desc:'Sperimenti un nuovo canale su piccola scala, rischio contenuto.'},
+    {name:'Nuovo canale di vendita diretto', desc:'Apri un canale strutturato (es. e-commerce diretto): investimento medio.'},
+    {name:'Espansione in un nuovo mercato geografico', desc:'Il passo più ambizioso: alto investimento, alto potenziale di diversificazione.'}
+  ],
+  rebrand:[
+    {name:'Restyling dell\'identità visiva', desc:'Aggiornamento leggero di loghi e materiali: costo contenuto.'},
+    {name:'Riposizionamento con nuova campagna', desc:'Cambio di percezione sul mercato supportato da comunicazione dedicata.'},
+    {name:'Rebranding completo', desc:'Nuova narrativa aziendale a tutto tondo: investimento importante, massimo impatto potenziale.'}
+  ],
+  new_product:[
+    {name:'Estensione di linea a basso rischio', desc:'Variante di un prodotto esistente: veloce, rischio contenuto, potenziale limitato.'},
+    {name:'Nuovo prodotto nel segmento core', desc:'Sviluppo di un prodotto centrale per il business: rischio ed effort bilanciati.'},
+    {name:'Prodotto innovativo ad alto rischio', desc:'Scommessa su qualcosa di nuovo: costoso e lento, ma il payoff può essere grande.'}
+  ],
+  product_efficiency:[
+    {name:'Micro-ottimizzazioni incrementali', desc:'Piccoli miglioramenti continui a basso costo.'},
+    {name:'Revisione del processo produttivo', desc:'Intervento più strutturato sulla gamma esistente.'},
+    {name:'Reingegnerizzazione completa', desc:'Ripensamento profondo del prodotto: costoso, ma il guadagno di margine è il più alto.'}
+  ],
+  explore_rd:[
+    {name:'Ricerca esplorativa a budget contenuto', desc:'Piccola scommessa su una tecnologia emergente.'},
+    {name:'Programma di innovazione dedicato', desc:'Team e budget dedicati a esplorare nuove frontiere.'},
+    {name:'Scommessa strategica su tecnologia emergente', desc:'Investimento massiccio su una tecnologia ancora incerta: il rischio più alto del gioco, con il rendimento più alto.'}
+  ],
+  supply_chain:[
+    {name:'Ottimizzazione dei processi esistenti', desc:'Interventi mirati sull\'efficienza operativa attuale.'},
+    {name:'Rinegoziazione con i fornitori principali', desc:'Rivedi i contratti chiave della supply chain.'},
+    {name:'Ridisegno completo della supply chain', desc:'Trasformazione strutturale della catena di fornitura: investimento alto, beneficio maggiore.'}
+  ],
+  automation:[
+    {name:'Automazione parziale di reparto', desc:'Automatizzi una singola linea o processo: impatto contenuto su costi e morale.'},
+    {name:'Automazione su scala di stabilimento', desc:'Investimento più ampio, risparmi più consistenti, maggiore impatto sul personale.'},
+    {name:'Trasformazione digitale completa delle operations', desc:'Il salto più grande: massimo risparmio di lungo periodo, ma forte impatto sul morale del team.'}
+  ]
+};
+
+/* ============ SAVE / LOAD (localStorage) ============ */
+const SAVE_KEY = 'greedroom_save_v1';
+function saveGame(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+  catch(e){ /* storage unavailable, fail silently */ }
+}
+function loadSavedGame(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+function clearSavedGame(){
+  try{ localStorage.removeItem(SAVE_KEY); } catch(e){}
+}
+
+/* ============ STATE ============ */
+let state = null;
+let selectedIndustry = null;
+let selectedListed = null;
+let pendingEvent = null;
+const MAX_ACTIVE_DIRECTIVES = 2;
+const EVENT_BASE_CHANCE = 0.55; // probability that SOME event fires in a given quarter
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function fmt(v){return '€'+v.toFixed(1)+'M';}
+
+/* ============ CAUSE-EFFECT DELTA TRACKING ============ */
+const METRIC_DEFS = [
+  {key:'cash', label:'Cassa', fmt:v=>fmt(Math.abs(v)), threshold:0.01},
+  {key:'revenue', label:'Ricavi', fmt:v=>fmt(Math.abs(v)), threshold:0.01},
+  {key:'marketShare', label:'Quota di mercato', fmt:v=>(Math.abs(v)*100).toFixed(1)+'pp', threshold:0.0008},
+  {key:'baseMargin', label:'Margine EBITDA', fmt:v=>(Math.abs(v)*100).toFixed(1)+'pp', threshold:0.0008},
+  {key:'morale', label:'Morale', fmt:v=>Math.round(Math.abs(v)), threshold:0.4},
+  {key:'reputation', label:'Reputazione', fmt:v=>Math.round(Math.abs(v)), threshold:0.4},
+  {key:'boardConfidence', label:'Fiducia board', fmt:v=>Math.round(Math.abs(v)), threshold:0.4}
+];
+
+function snapshotKPIs(s){
+  const snap={};
+  METRIC_DEFS.forEach(m=> snap[m.key]=s[m.key]);
+  return snap;
+}
+
+function computeDeltas(before, after){
+  return METRIC_DEFS.map(m=>{
+    const raw = after[m.key]-before[m.key];
+    return {label:m.label, raw, text:m.fmt(raw)};
+  }).filter(d=>Math.abs(d.raw) > (METRIC_DEFS.find(m=>m.label===d.label).threshold));
+}
+
+function renderDeltaChips(deltas){
+  if(deltas.length===0) return `<div class="delta-row"><span class="delta-chip pos">Nessun effetto immediato misurabile</span></div>`;
+  return `<div class="delta-row">${deltas.map(d=>`<span class="delta-chip ${d.raw>=0?'pos':'neg'}">${d.label} ${d.raw>=0?'▲ +':'▼ -'}${d.text}</span>`).join('')}</div>`;
+}
+
+/* ============ REAL MACRO CONTEXT (calibrated on current economic data) ============ */
+const MACRO = {
+  ecbRate: 2.0,          // ECB deposit facility rate, early 2026
+  eurozoneGrowth: 1.1,   // Eurozone GDP growth forecast 2026 (%)
+  note: 'Contesto: tassi BCE al 2,0%, crescita Eurozona attesa ~1,1% nel 2026 — economia stabile ma poco dinamica.'
+};
+
+function setAnnualBudget(s){
+  const growthTarget = 0.08 + (MACRO.eurozoneGrowth/100)*2; // ambitious vs macro backdrop
+  s.budget = {
+    year: Math.ceil(s.quarter/4),
+    revenueTarget: s.revenue*4*(1+growthTarget),
+    marginTarget: clamp(s.baseMargin+0.015,0.02,0.6)
+  };
+}
+
+function initState(ind){
+  return {
+    industry: ind,
+    quarter: 1,
+    cash: ind.startRevenue*0.6,
+    revenue: ind.startRevenue,
+    baseMargin: ind.baseMargin,
+    marketShare: ind.startShare,
+    reputation: 60,
+    morale: 65,
+    pending: [], // {office, directiveId, level, resolveQuarter, name}
+    reports: [], // {quarter, ok, title, body}
+    startValuation: 0,
+    targetValuation: 0,
+    lastGrowthActionQuarter: 1,
+    zones: ZONES.map(z=>({...z, opened:false, revenueContribution:0})),
+    driverLog:[],
+    boardConfidence: 60,
+    peOfferCooldown: 5,
+    exited:false,
+    valuationHistory:[],
+    marketShareHistory:[],
+    revenueHistoryForGrowth:[],
+    _prevKpis:{},
+    competitors:[
+      {name:'Concorrente Alfa', share: ind.startShare*1.35},
+      {name:'Concorrente Beta', share: ind.startShare*1.05}
+    ],
+    gameOver:false
+  };
+}
+
+function othersShare(s){
+  const compTotal = s.competitors.reduce((a,c)=>a+c.share,0);
+  return clamp(1 - s.marketShare - compTotal, 0, 1);
+}
+
+function valuation(s){
+  const ebitda = s.revenue*s.baseMargin*4; // annualized
+  return Math.max(0, ebitda*s.industry.evMultiple);
+}
+
+function computeROS(s){
+  const ind=s.industry;
+  const daFactor = 0.03*ind.capexMult; // D&A as % of quarterly revenue
+  const ebitdaQ = s.revenue*s.baseMargin;
+  const daQ = s.revenue*daFactor;
+  const ebitQ = ebitdaQ-daQ;
+  return { ebitAnnual: ebitQ*4, ros: (ebitQ/s.revenue)*100 };
+}
+
+function computeDCF(s){
+  const ind=s.industry;
+  const {ebitAnnual} = computeROS(s);
+  const taxRate=0.27; // stima aliquota effettiva IRES+IRAP
+  const nopat = ebitAnnual*(1-taxRate);
+  const hist=s.revenueHistoryForGrowth;
+  let g = hist.length>1 ? (hist[hist.length-1]-hist[hist.length-2])/hist[hist.length-2] : 0.02;
+  g = clamp(g, -0.05, 0.12);
+  const wacc = clamp(MACRO.ecbRate/100 + 0.05 + ind.volatility*0.015, 0.06, 0.16);
+  const terminalGrowth = clamp((MACRO.eurozoneGrowth/100)*0.8, 0.005, 0.02);
+  let pv=0, fcf=nopat;
+  for(let t=1;t<=5;t++){
+    fcf = fcf*(1+g);
+    pv += fcf/Math.pow(1+wacc,t);
+  }
+  const terminalValue = (fcf*(1+terminalGrowth))/(wacc-terminalGrowth);
+  const pvTerminal = terminalValue/Math.pow(1+wacc,5);
+  return { value: pv+pvTerminal, wacc, g, terminalGrowth };
+}
+
+/* ============ RENDER: START SCREEN ============ */
+document.getElementById('macroNote').textContent = MACRO.note;
+
+const savedGame = loadSavedGame();
+if(savedGame && !savedGame.gameOver){
+  const contBtn = document.getElementById('continueBtn');
+  contBtn.style.display='block';
+  contBtn.addEventListener('click',()=>{
+    state = savedGame;
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('header').classList.remove('hidden');
+    document.getElementById('bottomNav').classList.remove('hidden');
+    showScreen('dashboardScreen');
+    renderDashboard();
+  });
+}
+
+const industryListEl = document.getElementById('industryList');
+INDUSTRIES.forEach(ind=>{
+  const card=document.createElement('div');
+  card.className='industry-card';
+  card.dataset.id=ind.id;
+  card.innerHTML=`
+    <div class="name">${ind.icon} ${ind.name}</div>
+    <div class="desc">${ind.desc}</div>
+    <div class="tag-row">${ind.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+  `;
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('#industryList .industry-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedIndustry = ind;
+    updateStartBtn();
+  });
+  industryListEl.appendChild(card);
+});
+
+function updateStartBtn(){
+  document.getElementById('startBtn').disabled = !(selectedIndustry && selectedListed!==null);
+}
+['listedPrivate','listedPublic'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',()=>{
+    document.getElementById('listedPrivate').classList.remove('selected');
+    document.getElementById('listedPublic').classList.remove('selected');
+    document.getElementById(id).classList.add('selected');
+    selectedListed = (id==='listedPublic');
+    updateStartBtn();
+  });
+});
+
+document.getElementById('startBtn').addEventListener('click',()=>{
+  state = initState(selectedIndustry);
+  state.listed = selectedListed;
+  state.startValuation = valuation(state);
+  state.targetValuation = state.startValuation*2.5;
+  state.valuationHistory = [state.startValuation];
+  state.marketShareHistory = [state.marketShare];
+  state.revenueHistoryForGrowth = [state.revenue];
+  if(state.listed){
+    state.stockPrice = 100;
+    state.stockHistory = [100];
+  }
+  setAnnualBudget(state);
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('header').classList.remove('hidden');
+  document.getElementById('bottomNav').classList.remove('hidden');
+  showScreen('dashboardScreen');
+  renderDashboard();
+  saveGame();
+});
+
+/* ============ NAVIGATION ============ */
+function showScreen(id){
+  ['startScreen','dashboardScreen','financeScreen','commercialScreen','boardScreen','officeScreen','inboxScreen','eventScreen','endScreen'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.screen===id);
+  });
+  if(id==='financeScreen') renderFinanceView();
+  if(id==='commercialScreen') renderCommercialView();
+  if(id==='boardScreen') renderBoardRoom();
+}
+document.querySelectorAll('.nav-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    showScreen(b.dataset.screen);
+    if(b.dataset.screen==='inboxScreen') renderInbox();
+  });
+});
+document.getElementById('backToDash').addEventListener('click',()=>showScreen('dashboardScreen'));
+document.querySelectorAll('.office-row').forEach(row=>{
+  row.addEventListener('click',()=>{
+    openOffice(row.dataset.office);
+  });
+});
+
+/* ============ VISUAL HELPERS ============ */
+const EVENT_ICONS = {
+  commodity_shock:'🧱', strike:'✊', price_war:'💥', rate_hike:'🏦', new_entrant:'🚀',
+  regulation:'⚖️', demand_boom:'📈', cyberattack:'🛡️', key_talent_exit:'🚪',
+  favorable_regulation:'🎁', currency_shock:'💱', supplier_scandal:'⚠️', trade_tariffs:'🛃',
+  pe_offer:'💼'
+};
+
+function bumpEl(el){
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+
+function staggerChildren(containerEl, selector){
+  const items = containerEl.querySelectorAll(selector || ':scope > *');
+  items.forEach((el,i)=>{ el.style.animationDelay = (i*0.06)+'s'; });
+}
+
+function animateNumber(el, from, to, formatFn, duration){
+  duration = duration || 550;
+  const start = performance.now();
+  const diff = to-from;
+  if(Math.abs(diff) < 0.001){ el.textContent = formatFn(to); return; }
+  function tick(now){
+    const t = Math.min(1,(now-start)/duration);
+    const eased = 1-Math.pow(1-t,3);
+    const val = from + diff*eased;
+    el.textContent = formatFn(val);
+    if(t<1) requestAnimationFrame(tick);
+    else el.textContent = formatFn(to);
+  }
+  requestAnimationFrame(tick);
+}
+
+function setKpi(id,text,bumpIfChanged){
+  const el=document.getElementById(id);
+  if(bumpIfChanged && el.textContent!==text) bumpEl(el);
+  el.textContent=text;
+}
+
+function drawSparkline(history, target, canvasId){
+  const canvas=document.getElementById(canvasId || 'sparklineCanvas');
+  if(!canvas) return;
+  const dpr=window.devicePixelRatio||1;
+  const w=canvas.clientWidth||300, h=60;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  if(history.length<2){ return; }
+  const allVals = history.concat([target]);
+  const min = Math.min(...allVals)*0.9;
+  const max = Math.max(...allVals)*1.08;
+  const range = Math.max(0.001, max-min);
+  const stepX = w/(history.length-1);
+  const yFor = v => h - ((v-min)/range)*h;
+
+  // target line
+  ctx.strokeStyle='rgba(154,163,181,0.4)';
+  ctx.setLineDash([3,3]);
+  ctx.beginPath();
+  ctx.moveTo(0,yFor(target));
+  ctx.lineTo(w,yFor(target));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // area fill
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(201,162,75,0.35)');
+  grad.addColorStop(1,'rgba(201,162,75,0)');
+  ctx.beginPath();
+  ctx.moveTo(0,yFor(history[0]));
+  history.forEach((v,i)=> ctx.lineTo(i*stepX, yFor(v)));
+  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  // line
+  ctx.strokeStyle='#c9a24b';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  history.forEach((v,i)=>{ const x=i*stepX, y=yFor(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+
+  // last point dot
+  const lastX=(history.length-1)*stepX, lastY=yFor(history[history.length-1]);
+  ctx.fillStyle='#e3c47a';
+  ctx.beginPath(); ctx.arc(lastX,lastY,3.2,0,Math.PI*2); ctx.fill();
+}
+
+/* ============ DASHBOARD RENDER ============ */
+function renderDashboard(){
+  document.getElementById('quarterLabel').textContent = `Q${((state.quarter-1)%4)+1} · Anno ${Math.ceil(state.quarter/4)}`;
+  const prev = state._prevKpis || {};
+
+  const kc=document.getElementById('kpiCash');
+  animateNumber(kc, prev.cash!==undefined?prev.cash:state.cash, state.cash, v=>fmt(v));
+  kc.className='value '+(state.cash<0?'neg':'');
+  if(prev.cash!==undefined && prev.cash!==state.cash) bumpEl(kc);
+
+  const krEl=document.getElementById('kpiRevenue');
+  animateNumber(krEl, prev.revenue!==undefined?prev.revenue:state.revenue, state.revenue, v=>fmt(v));
+  if(prev.revenue!==undefined && prev.revenue!==state.revenue) bumpEl(krEl);
+
+  const kmEl=document.getElementById('kpiMargin');
+  animateNumber(kmEl, prev.margin!==undefined?prev.margin:state.baseMargin*100, state.baseMargin*100, v=>v.toFixed(1)+'%');
+  if(prev.margin!==undefined && prev.margin!==state.baseMargin*100) bumpEl(kmEl);
+
+  const ksEl=document.getElementById('kpiShare');
+  animateNumber(ksEl, prev.share!==undefined?prev.share:state.marketShare*100, state.marketShare*100, v=>v.toFixed(1)+'%');
+  if(prev.share!==undefined && prev.share!==state.marketShare*100) bumpEl(ksEl);
+
+  setKpi('kpiMorale', Math.round(state.morale), true);
+  setKpi('kpiRep', Math.round(state.reputation), true);
+  const kb=document.getElementById('kpiBoard');
+  const boardText=Math.round(state.boardConfidence);
+  if(kb.textContent!=boardText) bumpEl(kb);
+  kb.textContent=boardText;
+  kb.className='value '+(state.boardConfidence<25?'neg':(state.boardConfidence>75?'pos':''));
+
+  const v=valuation(state);
+  const vEl=document.getElementById('kpiValuation');
+  animateNumber(vEl, prev.valuation!==undefined?prev.valuation:v, v, val=>fmt(val), 700);
+  if(prev.valuation!==undefined && prev.valuation!==v) bumpEl(vEl);
+  document.getElementById('valuationTarget').textContent=`Obiettivo: ${fmt(state.targetValuation)} entro trimestre 20`;
+
+  state._prevKpis = { cash:state.cash, revenue:state.revenue, margin:state.baseMargin*100, share:state.marketShare*100, valuation:v };
+
+  document.getElementById('sparklineNow').textContent=fmt(v);
+  drawSparkline(state.valuationHistory.length? state.valuationHistory : [v,v], state.targetValuation);
+
+  // Budget vs Actual
+  document.getElementById('budgetYear').textContent = state.budget.year;
+  const revVar = ((state.revenue*4 - state.budget.revenueTarget)/state.budget.revenueTarget)*100;
+  const marginVar = (state.baseMargin - state.budget.marginTarget)*100;
+  const revRow = document.getElementById('budgetRevRow');
+  revRow.textContent = `${fmt(state.revenue*4)} vs TGT ${fmt(state.budget.revenueTarget)} (${revVar>=0?'+':''}${revVar.toFixed(1)}%)`;
+  revRow.style.color = revVar>=0? 'var(--green)':'var(--red)';
+  const marRow = document.getElementById('budgetMarginRow');
+  marRow.textContent = `${(state.baseMargin*100).toFixed(1)}% vs TGT ${(state.budget.marginTarget*100).toFixed(1)}% (${marginVar>=0?'+':''}${marginVar.toFixed(1)}pp)`;
+  marRow.style.color = marginVar>=0? 'var(--green)':'var(--red)';
+
+  // Stock ticker
+  const stockWrap=document.getElementById('stockWrap');
+  if(state.listed){
+    stockWrap.style.display='block';
+    const last = state.stockHistory[state.stockHistory.length-1];
+    const prev = state.stockHistory.length>1? state.stockHistory[state.stockHistory.length-2] : last;
+    const chg = ((last-prev)/prev)*100;
+    const stockNowEl=document.getElementById('stockNow');
+    stockNowEl.textContent = `${last.toFixed(1)} (${chg>=0?'+':''}${chg.toFixed(1)}%)`;
+    stockNowEl.style.color = chg>=0? 'var(--green)':'var(--red)';
+    drawSparkline(state.stockHistory.length>1?state.stockHistory:[last,last], state.stockHistory[0], 'stockCanvas');
+  } else {
+    stockWrap.style.display='none';
+  }
+
+  renderCompetitors();
+
+  const pendingCountEl = document.getElementById('pendingCount');
+  if(state.pending.length>0){
+    pendingCountEl.textContent=state.pending.length;
+    pendingCountEl.classList.remove('hidden');
+  } else pendingCountEl.classList.add('hidden');
+
+  const pl=document.getElementById('pendingList');
+  pl.innerHTML='';
+  if(state.pending.length===0){
+    pl.innerHTML='<div class="empty">Nessuna direttiva attiva. Vai in un ufficio per assegnarne una.</div>';
+  } else {
+    state.pending.forEach(p=>{
+      const remaining = p.resolveQuarter - state.quarter;
+      const div=document.createElement('div');
+      div.className='directive-card';
+      div.innerHTML=`<div class="t">${p.name}</div><div class="d">Esito atteso tra ${remaining<=0?'questo trimestre':remaining+' trimestre/i'} · Ufficio: ${officeName(p.office)}</div>`;
+      pl.appendChild(div);
+    });
+    staggerChildren(pl);
+  }
+
+  document.getElementById('advanceBtn').disabled=false;
+
+  // inbox badge
+  const unread = state.reports.filter(r=>r.quarter===state.quarter-1).length;
+  const navBadge=document.getElementById('navBadge');
+  if(unread>0){navBadge.style.display='inline'; navBadge.textContent=unread; navBadge.className='badge';}
+  else navBadge.style.display='none';
+}
+function officeName(o){return {finance:'Finance',marketing:'Marketing',rd:'R&D',ops:'Operations',sales:'Direzione Vendite'}[o];}
+
+function renderCompetitors(){
+  const s=state;
+  const rest = othersShare(s);
+  const rows = [
+    {n:'La tua azienda', v:s.marketShare, me:true},
+    ...s.competitors.map(c=>({n:c.name, v:c.share, me:false})),
+    {n:'Altri player', v:rest, me:false}
+  ];
+  renderCompetitorBarsInto('competitorBars', rows);
+}
+
+function renderCompetitorBarsInto(elId, rows){
+  const el=document.getElementById(elId);
+  el.innerHTML='';
+  rows.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='comp-bar-row';
+    div.innerHTML=`
+      <div class="comp-bar-label"><span class="n ${r.me?'me':''}">${r.n}</span><span class="n ${r.me?'me':''}">${(r.v*100).toFixed(1)}%</span></div>
+      <div class="comp-bar-track"><div class="comp-bar-fill ${r.me?'me':''}" style="width:0%"></div></div>
+    `;
+    el.appendChild(div);
+  });
+  staggerChildren(el);
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      el.querySelectorAll('.comp-bar-fill').forEach((fill,i)=>{
+        fill.style.width = Math.max(2, rows[i].v*100)+'%';
+      });
+    });
+  });
+}
+
+/* ============ FINANCE VIEW ============ */
+function renderFinanceView(){
+  const s=state, ind=s.industry;
+  const v=valuation(s);
+  document.getElementById('fnValuationNow').textContent=fmt(v);
+  drawSparkline(s.valuationHistory.length?s.valuationHistory:[v,v], s.targetValuation, 'fnValuationCanvas');
+
+  document.getElementById('fnCash').textContent=fmt(s.cash);
+  const ebitdaQ = s.revenue*s.baseMargin;
+  const burnOrGain = ebitdaQ*0.9; // matches cash flow logic in finishAdvance
+  let runwayText;
+  if(burnOrGain>=0){ runwayText='Positivo'; }
+  else { const q = Math.max(0, Math.floor(s.cash/Math.abs(burnOrGain))); runwayText = `~${q} trim.`; }
+  document.getElementById('fnRunway').textContent=runwayText;
+  document.getElementById('fnRevAnn').textContent=fmt(s.revenue*4);
+  document.getElementById('fnEbitda').textContent=fmt(ebitdaQ*4);
+  document.getElementById('fnMargin').textContent=(s.baseMargin*100).toFixed(1)+'%';
+  document.getElementById('fnMultiple').textContent=ind.evMultiple.toFixed(1)+'x';
+  const rosData = computeROS(s);
+  document.getElementById('fnRos').textContent=rosData.ros.toFixed(1)+'%';
+  const dcf = computeDCF(s);
+  document.getElementById('fnDcf').textContent=fmt(dcf.value);
+  document.getElementById('fnDcfAssumptions').textContent=`Ipotesi: WACC ${(dcf.wacc*100).toFixed(1)}%, crescita ${(dcf.g*100).toFixed(1)}%/anno, g terminale ${(dcf.terminalGrowth*100).toFixed(1)}%`;
+
+  document.getElementById('fnBudgetYear').textContent=s.budget.year;
+  const revVar=((s.revenue*4-s.budget.revenueTarget)/s.budget.revenueTarget)*100;
+  const marVar=(s.baseMargin-s.budget.marginTarget)*100;
+  const fnBudgetRev=document.getElementById('fnBudgetRev');
+  fnBudgetRev.textContent=`${fmt(s.revenue*4)} vs TGT ${fmt(s.budget.revenueTarget)} (${revVar>=0?'+':''}${revVar.toFixed(1)}%)`;
+  fnBudgetRev.style.color=revVar>=0?'var(--green)':'var(--red)';
+  const fnBudgetMargin=document.getElementById('fnBudgetMargin');
+  fnBudgetMargin.textContent=`${(s.baseMargin*100).toFixed(1)}% vs TGT ${(s.budget.marginTarget*100).toFixed(1)}% (${marVar>=0?'+':''}${marVar.toFixed(1)}pp)`;
+  fnBudgetMargin.style.color=marVar>=0?'var(--green)':'var(--red)';
+
+  const stockSection=document.getElementById('fnStockSection');
+  if(s.listed){
+    stockSection.style.display='block';
+    const last=s.stockHistory[s.stockHistory.length-1];
+    document.getElementById('fnStockNow').textContent=last.toFixed(1);
+    drawSparkline(s.stockHistory.length>1?s.stockHistory:[last,last], s.stockHistory[0], 'fnStockCanvas');
+  } else {
+    stockSection.style.display='none';
+  }
+
+  renderDiagnosisInto('fnDiagnosis','finance');
+}
+
+function renderDiagnosisInto(elId, category){
+  const el=document.getElementById(elId);
+  const log=(state.driverLog||[]).filter(d=>d.category===category && state.quarter-d.quarter<=6).slice(-5).reverse();
+  el.innerHTML='';
+  if(log.length===0){
+    el.innerHTML='<div class="empty">Nessun fattore critico rilevato di recente.</div>';
+    return;
+  }
+  log.forEach(d=>{
+    const div=document.createElement('div');
+    div.className='report fail';
+    div.innerHTML=`<div class="h"><span>Trimestre ${d.quarter}</span></div><div class="b">${d.text}</div>`;
+    el.appendChild(div);
+  });
+}
+
+/* ============ COMMERCIAL VIEW ============ */
+function renderCommercialView(){
+  const s=state;
+  document.getElementById('cmShare').textContent=(s.marketShare*100).toFixed(1)+'%';
+  const hist=s.revenueHistoryForGrowth;
+  const growth = hist.length>1 ? ((hist[hist.length-1]-hist[hist.length-2])/hist[hist.length-2])*100 : 0;
+  const cmGrowthEl=document.getElementById('cmGrowth');
+  cmGrowthEl.textContent=(growth>=0?'+':'')+growth.toFixed(1)+'%';
+  cmGrowthEl.className='value '+(growth>=0?'pos':'neg');
+  document.getElementById('cmRep').textContent=Math.round(s.reputation);
+  document.getElementById('cmInactive').textContent=(s.quarter - s.lastGrowthActionQuarter);
+
+  const last=s.marketShareHistory[s.marketShareHistory.length-1]*100;
+  document.getElementById('cmShareNow').textContent=last.toFixed(1)+'%';
+  drawSparkline(s.marketShareHistory.length>1? s.marketShareHistory.map(v=>v*100) : [last,last], last, 'cmShareCanvas');
+
+  const rest=othersShare(s);
+  const rows=[
+    {n:'La tua azienda', v:s.marketShare, me:true},
+    ...s.competitors.map(c=>({n:c.name, v:c.share, me:false})),
+    {n:'Altri player', v:rest, me:false}
+  ];
+  renderCompetitorBarsInto('cmCompetitorBars', rows);
+
+  const zonesEl=document.getElementById('cmZones');
+  zonesEl.innerHTML='';
+  s.zones.forEach(z=>{
+    const div=document.createElement('div');
+    div.className='office-row';
+    div.style.cursor='default';
+    div.innerHTML=`
+      <div class="icon">${z.opened?'✅':'⬜'}</div>
+      <div class="info"><div class="t">${z.name}</div><div class="s">${z.opened? `Attivo · ${fmt(z.revenueContribution)}/trim.` : `Non presidiato · potenziale ${z.potential.toFixed(1)}x`}</div></div>
+    `;
+    zonesEl.appendChild(div);
+  });
+
+  renderDiagnosisInto('cmDiagnosis','commercial');
+}
+
+/* ============ BOARD MEETING ROOM ============ */
+const BOARD_SEATS = [
+  {office:'finance', label:'Finance', icon:'💰'},
+  {office:'marketing', label:'Marketing', icon:'📣'},
+  {office:'sales', label:'Vendite', icon:'🏬'},
+  {office:'rd', label:'R&D', icon:'🔬'},
+  {office:'ops', label:'Ops', icon:'⚙️'}
+];
+
+function buildBoardScene(){
+  const phaserContainer = document.getElementById('boardPhaserContainer');
+  if(phaserContainer.dataset.built) return;
+  phaserContainer.dataset.built='1';
+
+  let phaserOk = false;
+  try{
+    if(typeof Phaser !== 'undefined'){
+      initPhaserBoard(phaserContainer);
+      phaserOk = true;
+    }
+  } catch(e){
+    console.error('Phaser board init failed, falling back to HTML avatars:', e);
+    phaserOk = false;
+  }
+
+  if(!phaserOk){
+    phaserContainer.style.display='none';
+    document.getElementById('boardSeatsRow').style.display='flex';
+    buildHtmlBoardFallback();
+  }
+}
+
+function buildHtmlBoardFallback(){
+  const row = document.getElementById('boardSeatsRow');
+  if(row.dataset.built) return;
+  row.dataset.built='1';
+  BOARD_SEATS.forEach(seat=>{
+    const btn = document.createElement('button');
+    btn.type='button';
+    btn.className='board-avatar';
+    btn.dataset.office = seat.office;
+    btn.innerHTML = `
+      <div class="avatar-head">${seat.icon}</div>
+      <div class="avatar-body"><div class="avatar-tie"></div></div>
+      <div class="avatar-label">${seat.label}</div>
+    `;
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.board-avatar').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      showBoardPresentation(seat.office);
+    });
+    row.appendChild(btn);
+  });
+}
+
+function initPhaserBoard(containerEl){
+  const seats = BOARD_SEATS;
+  const W=340, H=180;
+  const seatRefs = [];
+
+  function createScene(){
+    const scene = this;
+    const tableY = H-34;
+
+    const tableG = scene.add.graphics();
+    tableG.fillStyle(0x241a0c,1);
+    tableG.fillRoundedRect(8, tableY, W-16, 30, 8);
+    tableG.lineStyle(2,0xc9a24b,1);
+    tableG.strokeRoundedRect(8, tableY, W-16, 30, 8);
+    tableG.fillStyle(0xc9a24b, 0.3);
+    tableG.fillRoundedRect(8, tableY, W-16, 5, {tl:8,tr:8,bl:0,br:0});
+
+    const spacing = (W-50)/(seats.length-1);
+
+    seats.forEach((seat,i)=>{
+      const cx = 25 + i*spacing;
+      const cy = tableY - 38;
+      const container = scene.add.container(cx, cy);
+
+      const body = scene.add.graphics();
+      body.fillStyle(0x1e2a44,1);
+      body.lineStyle(1.5,0x2a3650,1);
+      body.fillRoundedRect(-17,8,34,32,{tl:13,tr:13,bl:5,br:5});
+      body.strokeRoundedRect(-17,8,34,32,{tl:13,tr:13,bl:5,br:5});
+
+      const head = scene.add.circle(0,-4,10,0xe3c47a);
+      const tie = scene.add.triangle(0,14, -3,0, 3,0, 0,13, 0xc9a24b);
+      const icon = scene.add.text(0,-21,seat.icon,{fontSize:'13px'}).setOrigin(0.5);
+      const label = scene.add.text(0,44,seat.label,{fontSize:'9.5px', color:'#9aa3b5', fontFamily:'Inter, sans-serif'}).setOrigin(0.5);
+
+      container.add([body, head, tie, icon, label]);
+      container.setSize(40,70);
+      container.setInteractive({useHandCursor:true});
+
+      scene.tweens.add({ targets:container, y: cy-4, duration:1500+i*140, yoyo:true, repeat:-1, ease:'Sine.easeInOut' });
+
+      container.on('pointerover', ()=>{
+        if(!container.getData('active')) scene.tweens.add({targets:container, scale:1.08, duration:150});
+      });
+      container.on('pointerout', ()=>{
+        if(!container.getData('active')) scene.tweens.add({targets:container, scale:1, duration:150});
+      });
+      container.on('pointerdown', ()=>{
+        seatRefs.forEach(r=>{
+          r.container.setData('active', r.office===seat.office);
+          r.body.clear();
+          const isActive = r.office===seat.office;
+          r.body.fillStyle(isActive?0xc9a24b:0x1e2a44,1);
+          r.body.lineStyle(1.5, isActive?0xe3c47a:0x2a3650,1);
+          r.body.fillRoundedRect(-17,8,34,32,{tl:13,tr:13,bl:5,br:5});
+          r.body.strokeRoundedRect(-17,8,34,32,{tl:13,tr:13,bl:5,br:5});
+          r.label.setColor(isActive?'#e3c47a':'#9aa3b5');
+          scene.tweens.add({targets:r.container, scale:isActive?1.1:1, duration:150});
+        });
+        spawnBurst(scene, cx, cy-10);
+        showBoardPresentation(seat.office);
+      });
+
+      seatRefs.push({container, body, label, office:seat.office});
+    });
+  }
+
+  function spawnBurst(scene, x, y){
+    for(let i=0;i<8;i++){
+      const angle = (Math.PI*2/8)*i;
+      const dot = scene.add.circle(x,y,3,0xc9a24b);
+      scene.tweens.add({
+        targets:dot,
+        x: x+Math.cos(angle)*26,
+        y: y+Math.sin(angle)*26,
+        alpha:0,
+        duration:450,
+        ease:'Cubic.easeOut',
+        onComplete:()=>dot.destroy()
+      });
+    }
+  }
+
+  const config = {
+    type: Phaser.AUTO,
+    width: W,
+    height: H,
+    parent: containerEl,
+    transparent: true,
+    scene: { create: createScene }
+  };
+  window._boardPhaserGame = new Phaser.Game(config);
+}
+
+function showBoardPresentation(office){
+  const panel = document.getElementById('boardPresentationPanel');
+  panel.classList.remove('hidden');
+  document.getElementById('boardPresTitle').textContent = `${officeName(office)} — Presentazione`;
+  document.getElementById('boardPresBody').textContent = buildPresentation(office);
+  const openBtn = document.getElementById('boardOpenOfficeBtn');
+  openBtn.onclick = ()=> openOffice(office);
+}
+
+function renderBoardRoom(){
+  buildBoardScene();
+  const s=state;
+  const list=document.getElementById('boardFunctionList');
+  list.innerHTML='';
+  ['finance','marketing','sales','rd','ops'].forEach(office=>{
+    const pending = s.pending.filter(p=>p.office===office);
+    const recentReports = [...s.reports].reverse().filter(r=>r.office===office).slice(0,2);
+    const card=document.createElement('div');
+    card.className='office-row';
+    card.style.flexDirection='column';
+    card.style.alignItems='stretch';
+    card.style.cursor='default';
+    const icons={finance:'💰',marketing:'📣',sales:'🏬',rd:'🔬',ops:'⚙️'};
+    let summary = '';
+    if(pending.length===0 && recentReports.length===0){
+      summary = 'Nessuna iniziativa recente da riportare.';
+    } else {
+      if(pending.length>0){
+        summary += `In corso: ${pending.map(p=>p.name).join(', ')}. `;
+      }
+      if(recentReports.length>0){
+        summary += `Ultimo esito: "${recentReports[0].title}".`;
+      }
+    }
+    card.innerHTML=`
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="icon">${icons[office]}</div>
+        <div class="info"><div class="t">${officeName(office)}</div><div class="s">${summary}</div></div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+  staggerChildren(list);
+}
+
+function buildPresentation(office){
+  const s=state;
+  const lines=[];
+  if(office==='finance'){
+    lines.push(`Cassa disponibile: ${fmt(s.cash)}. Margine EBITDA attuale: ${(s.baseMargin*100).toFixed(1)}%.`);
+    lines.push(`Rispetto al budget dell'anno, siamo a ${(((s.revenue*4-s.budget.revenueTarget)/s.budget.revenueTarget)*100).toFixed(1)}% sui ricavi.`);
+  } else if(office==='marketing'){
+    lines.push(`Quota di mercato attuale: ${(s.marketShare*100).toFixed(1)}%. Reputazione: ${Math.round(s.reputation)}/100.`);
+    lines.push(`Sono passati ${s.quarter-s.lastGrowthActionQuarter} trimestri dall'ultima iniziativa commerciale.`);
+  } else if(office==='rd'){
+    lines.push(`Nessun prodotto in sviluppo al momento richiede attenzione particolare.`);
+    lines.push(`Il margine EBITDA riflette anche l'efficienza dei prodotti attuali (${(s.baseMargin*100).toFixed(1)}%).`);
+  } else if(office==='sales'){
+    const opened = s.zones.filter(z=>z.opened);
+    lines.push(`Punti vendita/concessionari attivi: ${opened.length}/${s.zones.length} (${opened.map(z=>z.name).join(', ')||'nessuno'}).`);
+    lines.push(`Contributo della rete ai ricavi: ${fmt(opened.reduce((a,z)=>a+z.revenueContribution,0))}/trimestre.`);
+  } else if(office==='ops'){
+    lines.push(`Morale del team: ${Math.round(s.morale)}/100.`);
+    lines.push(`Le operations continuano a supportare il margine attuale del ${(s.baseMargin*100).toFixed(1)}%.`);
+  }
+  return lines.join(' ');
+}
+
+/* ============ OFFICE SCREEN ============ */
+let currentOffice=null;
+function openOffice(office){
+  currentOffice=office;
+  document.getElementById('officeTitle').textContent=officeName(office);
+  const activeCount = state.pending.length;
+  const slotNote=document.getElementById('slotNote');
+  slotNote.textContent = `Direttive attive: ${activeCount}/${MAX_ACTIVE_DIRECTIVES}. Puoi assegnarne di nuove solo se hai slot liberi.`;
+  const listEl=document.getElementById('directiveList');
+  listEl.innerHTML='';
+  DIRECTIVES[office].forEach(d=>{
+    const card=document.createElement('div');
+    card.className='directive-card';
+
+    if(d.zoneBased){
+      const availableZones = state.zones.filter(z=>!z.opened);
+      card.innerHTML=`
+        <div class="t">${d.name}</div>
+        <div class="d">${d.desc}</div>
+        <div class="d" style="color:var(--gold-soft); margin-bottom:6px;">${availableZones.length===0?'Tutte le zone sono già coperte.':'Scegli la zona in cui aprire:'}</div>
+        <div id="zone-list-${d.id}"></div>
+      `;
+      listEl.appendChild(card);
+      const zoneListEl = card.querySelector(`#zone-list-${d.id}`);
+      availableZones.forEach(zone=>{
+        const cost = state.revenue*(0.10*zone.potential);
+        const zc=document.createElement('div');
+        zc.className='directive-card';
+        zc.style.background='var(--navy-2)';
+        zc.innerHTML=`
+          <div class="t" style="font-size:13.5px;">${zone.name}</div>
+          <div class="d">Potenziale di mercato relativo: ${zone.potential>1?'alto':(zone.potential<0.9?'contenuto':'medio')} (${zone.potential.toFixed(1)}x)</div>
+          <div class="directive-meta"><span>Costo: ${fmt(cost)}</span><span>Esito in ${d.delay} trim.</span></div>
+          <button class="btn small" data-assign-zone="${zone.id}">Apri a ${zone.name}</button>
+        `;
+        zoneListEl.appendChild(zc);
+        zc.querySelector('[data-assign-zone]').addEventListener('click',()=>{
+          assignZoneDirective(office,d,zone.id,cost);
+        });
+      });
+      return;
+    }
+
+    let chosenLevel=0;
+    const labels = APPROACH_LABELS[d.id] || LEVELS.map(l=>({name:l,desc:''}));
+    card.innerHTML=`
+      <div class="t">${d.name}</div>
+      <div class="d">${d.desc}</div>
+      <div class="invest-options">
+        ${labels.map((l,i)=>`<div class="invest-btn ${i===0?'active':''}" data-lvl="${i}">${l.name}</div>`).join('')}
+      </div>
+      <div class="d" id="approach-desc-${d.id}" style="margin-bottom:8px;"></div>
+      <div class="directive-meta">
+        <span id="cost-${d.id}"></span>
+        <span id="delay-${d.id}"></span>
+      </div>
+      <div class="d" id="diag-row-${d.id}" style="font-size:11.5px; margin-top:-4px;"></div>
+      <button class="btn small" data-assign="${d.id}">Assegna a ${officeName(office)}</button>
+    `;
+    listEl.appendChild(card);
+    function updateMeta(){
+      const cost = state.revenue*d.costFactor[chosenLevel];
+      card.querySelector(`#cost-${d.id}`).textContent = cost>0? `Costo: ${fmt(cost)}` : 'Costo: —';
+      card.querySelector(`#delay-${d.id}`).textContent = `Esito in ${d.delay[chosenLevel]} trim.`;
+      card.querySelector(`#approach-desc-${d.id}`).textContent = labels[chosenLevel].desc;
+      const diagRow = card.querySelector(`#diag-row-${d.id}`);
+      const relevant = getRelevantDrivers(office);
+      diagRow.textContent = relevant.length>0
+        ? `⚠ Da considerare: ${relevant[0]}`
+        : `Nessun fattore critico noto al momento su quest'area.`;
+    }
+    updateMeta();
+    card.querySelectorAll('.invest-btn').forEach(b=>{
+      b.addEventListener('click',()=>{
+        card.querySelectorAll('.invest-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        chosenLevel=parseInt(b.dataset.lvl);
+        updateMeta();
+      });
+    });
+    card.querySelector('[data-assign]').addEventListener('click',()=>{
+      assignDirective(office,d,chosenLevel);
+    });
+  });
+  staggerChildren(listEl);
+  showScreen('officeScreen');
+}
+
+function getRelevantDrivers(office){
+  const category = (office==='finance'||office==='ops') ? 'finance' : 'commercial';
+  const log = (state.driverLog||[]).filter(d=>d.category===category && state.quarter-d.quarter<=4);
+  return log.slice(-2).reverse().map(d=>d.text);
+}
+
+function assignZoneDirective(office,d,zoneId,cost){
+  if(state.pending.length>=MAX_ACTIVE_DIRECTIVES){
+    alert('Hai già raggiunto il numero massimo di direttive attive per questo trimestre. Attendi un esito o avanza trimestre.');
+    return;
+  }
+  if(cost>state.cash){
+    alert('Cassa insufficiente per questa apertura.');
+    return;
+  }
+  const zone = state.zones.find(z=>z.id===zoneId);
+  state.cash -= cost;
+  state.pending.push({
+    office, directiveId:d.id, level:zoneId, name:`${d.name} — ${zone.name}`,
+    resolveQuarter: state.quarter + d.delay
+  });
+  state.lastGrowthActionQuarter = state.quarter;
+  showScreen('dashboardScreen');
+  renderDashboard();
+}
+
+function assignDirective(office,d,level){
+  if(state.pending.length>=MAX_ACTIVE_DIRECTIVES){
+    alert('Hai già raggiunto il numero massimo di direttive attive per questo trimestre. Attendi un esito o avanza trimestre.');
+    return;
+  }
+  const cost = state.revenue*d.costFactor[level];
+  if(cost>state.cash){
+    alert('Cassa insufficiente per questo livello di investimento.');
+    return;
+  }
+  state.cash -= cost;
+  const approachName = (APPROACH_LABELS[d.id] && APPROACH_LABELS[d.id][level].name) ? `${d.name} — ${APPROACH_LABELS[d.id][level].name}` : d.name;
+  state.pending.push({
+    office, directiveId:d.id, level, name:approachName,
+    resolveQuarter: state.quarter + d.delay[level]
+  });
+  if(office==='marketing' || office==='rd' || office==='sales'){
+    state.lastGrowthActionQuarter = state.quarter;
+  }
+  showScreen('dashboardScreen');
+  renderDashboard();
+}
+
+/* ============ INBOX ============ */
+function renderInbox(){
+  const rl=document.getElementById('reportList');
+  rl.innerHTML='';
+  if(state.reports.length===0){
+    rl.innerHTML='<div class="empty">Nessun report ancora. Avanza trimestre per ricevere i primi esiti.</div>';
+    return;
+  }
+  [...state.reports].reverse().forEach(r=>{
+    const div=document.createElement('div');
+    div.className='report '+(r.ok?'success':'fail');
+    div.innerHTML=`<div class="h"><span>Trimestre ${r.quarter}</span><span>${officeName(r.office)}</span></div>
+      <div class="t">${r.title}</div><div class="b">${r.body}</div>${r.deltas?renderDeltaChips(r.deltas):''}`;
+    rl.appendChild(div);
+  });
+  staggerChildren(rl);
+}
+
+/* ============ ADVANCE QUARTER (two-phase: possible event first) ============ */
+document.getElementById('advanceBtn').addEventListener('click',()=>{
+  const btn = document.getElementById('advanceBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    attemptEvent();
+  }, 450);
+});
+
+function attemptEvent(){
+  const s=state, ind=s.industry;
+
+  // ---- Special: PE fund interest if performance is particularly strong ----
+  const peOffer = checkPEOffer();
+  if(peOffer){
+    showEvent(peOffer);
+    return;
+  }
+
+  let chance = EVENT_BASE_CHANCE + (ind.volatility-1)*0.1;
+  // strikes are more likely with low morale: boost strike weight dynamically
+  const eligible = EVENTS.map(e=>{
+    let w = e.weight(ind);
+    if(e.id==='strike') w = s.morale<40 ? 3.2 : (s.morale<55? 1.4 : 0.3);
+    return {e, w};
+  }).filter(x=>x.w>0);
+
+  if(Math.random() < chance && eligible.length>0){
+    const totalW = eligible.reduce((a,x)=>a+x.w,0);
+    let r = Math.random()*totalW;
+    let chosen = eligible[0].e;
+    for(const x of eligible){ if(r<x.w){chosen=x.e; break;} r-=x.w; }
+    showEvent(chosen);
+  } else {
+    finishAdvance();
+  }
+}
+
+function checkPEOffer(){
+  const s=state, ind=s.industry;
+  if(s.exited) return null;
+  if(s.quarter < s.peOfferCooldown) return null;
+  const v = valuation(s);
+  const expected = s.startValuation + (s.targetValuation-s.startValuation)*(s.quarter/20);
+  const performingGreat = v >= expected*1.15 && s.boardConfidence>=70 && s.reputation>=65;
+  if(!performingGreat) return null;
+
+  return {
+    id:'pe_offer', title:'Un fondo si fa avanti',
+    body:(s2,ind2)=>`I risultati eccellenti hanno attirato l'attenzione di un fondo di investimento. Propongono un'operazione: capitale fresco per accelerare la crescita, oppure l'acquisizione totale dell'azienda a un multiplo interessante.`,
+    choices:[
+      {label:'Accetta capitale di crescita', desc:'Iniezione di liquidità importante in cambio di una quota di minoranza. Il board si aspetterà risultati ancora migliori.',
+        apply:(s2,ind2)=>{ s2.cash += s2.revenue*2.2; s2.boardConfidence=clamp(s2.boardConfidence+8,0,100); s2.reputation=clamp(s2.reputation+5,0,100); s2.peOfferCooldown = s2.quarter+6; }},
+      {label:'Accetta l\'acquisizione (Exit)', desc:'Vendi l\'azienda al fondo. Il mandato si chiude qui, con un\'uscita di successo.',
+        apply:(s2,ind2)=>{ s2.exited=true; }},
+      {label:'Rifiuta, resta indipendente', desc:'Nessun cambiamento immediato. Il board apprezza la fiducia nel piano attuale.',
+        apply:(s2,ind2)=>{ s2.boardConfidence=clamp(s2.boardConfidence+5,0,100); s2.peOfferCooldown = s2.quarter+6; }}
+    ]
+  };
+}
+
+function showEvent(eventDef){
+  pendingEvent = eventDef;
+  document.getElementById('eventIcon').textContent = EVENT_ICONS[eventDef.id] || '📰';
+  document.getElementById('eventTitle').textContent = eventDef.title;
+  document.getElementById('eventBody').textContent = eventDef.body(state, state.industry);
+  const cc = document.getElementById('eventChoices');
+  cc.innerHTML='';
+  eventDef.choices.forEach(choice=>{
+    const div=document.createElement('div');
+    div.className='event-choice';
+    div.innerHTML=`<div class="t">${choice.label}</div><div class="d">${choice.desc}</div>`;
+    div.addEventListener('click',()=>{
+      const before = snapshotKPIs(state);
+      choice.apply(state, state.industry);
+      const deltas = computeDeltas(before, snapshotKPIs(state));
+      state.reports.push({quarter:state.quarter+1, office:'finance', ok:true, title:'📰 '+eventDef.title, body:`Decisione presa: ${choice.label}.`, deltas});
+      pendingEvent=null;
+      showConsequence(eventDef.title, choice.label, deltas, ()=>finishAdvance());
+    });
+    cc.appendChild(div);
+  });
+  showScreen('eventScreen');
+}
+
+function showConsequence(eventTitle, choiceLabel, deltas, onContinue){
+  document.getElementById('eventIcon').textContent = '⚡';
+  document.getElementById('eventTitle').textContent = 'Conseguenza della decisione';
+  document.getElementById('eventBody').textContent = `Hai scelto: "${choiceLabel}" — ${eventTitle}. Ecco l'effetto immediato sui numeri:`;
+  const cc = document.getElementById('eventChoices');
+  cc.innerHTML = `
+    <div class="directive-card">
+      ${renderDeltaChips(deltas)}
+    </div>
+  `;
+  const btn=document.createElement('button');
+  btn.className='btn';
+  btn.textContent='Continua →';
+  btn.addEventListener('click', onContinue);
+  cc.appendChild(btn);
+}
+
+function finishAdvance(){
+  const s=state;
+  const ind=s.industry;
+
+  // organic quarterly evolution: revenue drifts with market share/cyclicality/random
+  const cyclic = Math.sin(s.quarter/2)*ind.cyclicality;
+  const randomShock = (Math.random()-0.5)*0.06*ind.volatility;
+  const moraleEffect = (s.morale-50)/50*0.02;
+  const growth = cyclic*0.03 + randomShock + moraleEffect;
+  s.revenue = Math.max(1, s.revenue*(1+growth));
+
+  // cash flow: EBITDA - fixed burn assumption
+  const ebitda = s.revenue*s.baseMargin;
+  s.cash += ebitda*0.9; // portion converts to cash quarterly
+
+  // morale/reputation slow drift back to baseline
+  s.morale = clamp(s.morale + (s.morale<50? 1: -0.5), 0,100);
+  s.reputation = clamp(s.reputation + (s.reputation<55?0.5:-0.2),0,100);
+
+  // delayed regulatory penalty roll (from "rimanda l'adeguamento" choice)
+  if(s._delayedPenalty && Math.random()<0.4){
+    s.cash -= s.revenue*0.07;
+    s.reputation = clamp(s.reputation-6,0,100);
+    s.reports.push({quarter:s.quarter+1, office:'finance', ok:false, title:'Sanzione per adeguamento normativo mancato', body:'Il regolatore ha sanzionato l\'azienda per il ritardo nell\'adeguamento agli standard richiesti.'});
+    s._delayedPenalty=false;
+  }
+
+  // resolve pending directives due this quarter
+  const stillPending=[];
+  s.pending.forEach(p=>{
+    if(p.resolveQuarter<=s.quarter+1){
+      const def = DIRECTIVES[p.office].find(x=>x.id===p.directiveId);
+      const before = snapshotKPIs(s);
+      const outcome = def.resolve(s,ind,p.level);
+      const deltas = computeDeltas(before, snapshotKPIs(s));
+      s.reports.push({quarter:s.quarter+1, office:p.office, ok:outcome.ok, title:outcome.title, body:outcome.body, deltas});
+    } else {
+      stillPending.push(p);
+    }
+  });
+  s.pending = stillPending;
+
+  // ---- competitive erosion: quota si restringe se non agisci ----
+  const quartersInactive = s.quarter - s.lastGrowthActionQuarter;
+  if(quartersInactive>=3){
+    const erosion = Math.min(0.02, 0.003*(quartersInactive-2));
+    const actualErosion = Math.min(erosion, Math.max(0,s.marketShare-0.02));
+    s.marketShare -= actualErosion;
+    if(actualErosion>0.001){
+      const split = actualErosion/2;
+      s.competitors[0].share += split;
+      s.competitors[1].share += split;
+      pushDriver(s,'commercial', `Nessuna iniziativa Marketing/Vendite/R&D da ${quartersInactive} trimestri: stai perdendo clienti a favore di ${s.competitors[0].name} e ${s.competitors[1].name}.`);
+    }
+  }
+  // competitors' own independent moves (small random walk)
+  s.competitors.forEach(c=>{
+    c.share = clamp(c.share + (Math.random()-0.45)*0.01*ind.volatility, 0.01, 0.6);
+  });
+
+  // ---- board confidence: reacts to performance vs expected trajectory ----
+  const v = valuation(s);
+  const expected = s.startValuation + (s.targetValuation-s.startValuation)*(s.quarter/20);
+  if(v >= expected*0.9){
+    s.boardConfidence = clamp(s.boardConfidence + 3, 0, 100);
+  } else if(v >= expected*0.6){
+    s.boardConfidence = clamp(s.boardConfidence - 2, 0, 100);
+  } else {
+    s.boardConfidence = clamp(s.boardConfidence - 6, 0, 100);
+  }
+  if(s.cash<0) s.boardConfidence = clamp(s.boardConfidence-5,0,100);
+
+  s.quarter += 1;
+  s.valuationHistory.push(valuation(s));
+  if(s.valuationHistory.length>24) s.valuationHistory.shift();
+  s.marketShareHistory.push(s.marketShare);
+  if(s.marketShareHistory.length>24) s.marketShareHistory.shift();
+  s.revenueHistoryForGrowth.push(s.revenue);
+  if(s.revenueHistoryForGrowth.length>8) s.revenueHistoryForGrowth.shift();
+
+  // new fiscal year: refresh Budget/Target
+  if((s.quarter-1)%4===0){
+    setAnnualBudget(s);
+  }
+
+  // stock price reaction (only listed companies)
+  if(s.listed){
+    const revVarPct = ((s.revenue*4 - s.budget.revenueTarget)/s.budget.revenueTarget);
+    const marginVarPp = (s.baseMargin - s.budget.marginTarget);
+    const valGrowth = s.valuationHistory.length>1 ?
+      (s.valuationHistory[s.valuationHistory.length-1]-s.valuationHistory[s.valuationHistory.length-2])/Math.max(1,s.valuationHistory[s.valuationHistory.length-2]) : 0;
+    const macroDrag = (MACRO.ecbRate-1.5)*0.004; // higher-for-longer rates are a mild headwind on multiples
+    const noise = (Math.random()-0.5)*0.04;
+    let move = revVarPct*0.9 + marginVarPp*4 + valGrowth*1.8 - macroDrag + noise;
+    move = clamp(move, -0.28, 0.28);
+    const newPrice = Math.max(1, s.stockPrice*(1+move));
+    s.stockPrice = newPrice;
+    s.stockHistory.push(newPrice);
+    if(s.stockHistory.length>24) s.stockHistory.shift();
+    if(move<=-0.15){
+      s.boardConfidence = clamp(s.boardConfidence-6,0,100);
+    } else if(move>=0.15){
+      s.boardConfidence = clamp(s.boardConfidence+4,0,100);
+    }
+  }
+
+  checkGameOver();
+  if(!s.gameOver){
+    renderDashboard();
+    showScreen('dashboardScreen');
+    saveGame();
+  }
+}
+
+function checkGameOver(){
+  const s=state;
+  if(s.exited){
+    const v=valuation(s);
+    endGame(true,'Exit completata con successo', `Hai venduto l'azienda a un fondo di investimento dopo ${s.quarter} trimestri, con una valutazione di ${fmt(v)}. Un'uscita da manuale.`);
+    return;
+  }
+  if(s.cash<0){
+    endGame(false,'Bancarotta','La cassa è andata sotto zero. Il consiglio di amministrazione ha revocato il mandato.');
+    return;
+  }
+  if(s.morale<=5){
+    endGame(false,'Il team si è sfaldato','Il morale è collassato: dimissioni di massa e crisi operativa hanno costretto il board a sostituirti.');
+    return;
+  }
+  if(s.reputation<=5){
+    endGame(false,'Fiducia del mercato azzerata','La reputazione dell\'azienda è collassata. Gli investitori hanno chiesto un cambio alla guida.');
+    return;
+  }
+  if(s.boardConfidence<=0){
+    endGame(false,'Licenziato dal board','Risultati insufficienti e prolungati rispetto agli obiettivi hanno esaurito la pazienza del consiglio: sei stato rimosso dall\'incarico.');
+    return;
+  }
+  if(s.quarter>20){
+    const v=valuation(s);
+    if(v>=s.targetValuation){
+      endGame(true,'Mandato concluso con successo', `Dopo 5 anni, la valutazione aziendale è ${fmt(v)}, superando l'obiettivo di ${fmt(s.targetValuation)}. Il board ti conferma per un nuovo mandato.`);
+    } else {
+      endGame(false,'Mandato concluso sotto le attese', `Dopo 5 anni la valutazione è ${fmt(v)}, sotto l'obiettivo di ${fmt(s.targetValuation)}. Il board decide di cercare un nuovo CEO.`);
+    }
+  }
+}
+
+function endGame(win,title,body){
+  state.gameOver=true;
+  clearSavedGame();
+  document.getElementById('endTitle').textContent=(win?'🏆 ':'📉 ')+title;
+  document.getElementById('endBody').textContent=body;
+  showScreen('endScreen');
+  document.getElementById('bottomNav').classList.add('hidden');
+}
+</script>
+</body>
+</html>
